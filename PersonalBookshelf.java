@@ -1,10 +1,10 @@
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class PersonalBookshelf {
     private String username;
-    private final HashMap<Book, LocalDateTime> borrowedBooks = new HashMap<>();
+    private final HashMap<Book, LocalDate> borrowedBooks = new HashMap<>();
     private final ArrayList<Book> readBooks = new ArrayList<>();
 
     public PersonalBookshelf() {
@@ -23,7 +23,7 @@ public class PersonalBookshelf {
     }
 
     public void borrowBook(Book book) {
-        borrowedBooks.put(book, LocalDateTime.now());        
+        borrowedBooks.put(book, LocalDate.now());        
     }
 
     public void returnBook(Book book) {

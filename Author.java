@@ -1,9 +1,9 @@
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class Author {
     private String name;
     private String nationality;
-    private LocalDateTime dateOfBirth;
+    private LocalDate dateOfBirth;
 
     public Author() {
     }
@@ -12,7 +12,7 @@ public class Author {
         this.name = name;
     }
 
-    public Author(String name, String nationality, LocalDateTime dateOfBirth) {
+    public Author(String name, String nationality, LocalDate dateOfBirth) {
         this.name = name;
         this.nationality = nationality;
         this.dateOfBirth = dateOfBirth;
@@ -26,11 +26,11 @@ public class Author {
         return nationality;
     }
 
-    public LocalDateTime getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(LocalDateTime dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
