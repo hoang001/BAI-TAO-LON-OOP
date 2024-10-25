@@ -78,6 +78,10 @@ CREATE TABLE ReadBooks (
 CREATE TABLE PersonalBookshelf (
     PersonalBookshelfID INT AUTO_INCREMENT NOT NULL,
     UserID INT NOT NULL,
+    BorrowID INT NOT NULL,
+    ReadID INT NOT NULL,
     PRIMARY KEY (PersonalBookshelfID),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (BorrowID) REFERENCES BorrowedBooks(BorrowID),
+    FOREIGN KEY (ReadID) REFERENCES ReadBooks(ReadID)
 );
