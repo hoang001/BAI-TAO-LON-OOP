@@ -38,7 +38,6 @@ CREATE TABLE Books (
     CategoryID INT NOT NULL,
     BookCoverDirectory VARCHAR(100),
     PRIMARY KEY (BookID),
-    UNIQUE (ISBN),
     FOREIGN KEY (AuthorID) REFERENCES Authors(AuthorID),
     FOREIGN KEY (PublisherID) REFERENCES Publishers(PublisherID),
     FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID)
@@ -53,6 +52,7 @@ CREATE TABLE Users (
     LastName VARCHAR(50) NOT NULL,
     PhoneNumber VARCHAR(20) NOT NULL,
     ProfileImageDirectory VARCHAR(100),
+    Role ENUM('ADMIN', 'LIBRARIAN', 'USER') NOT NULL,
     PRIMARY KEY (UserID),
     UNIQUE (Email),
     UNIQUE (PhoneNumber),
@@ -61,27 +61,29 @@ CREATE TABLE Users (
 
 CREATE TABLE BorrowedBooks (
     BorrowID INT AUTO_INCREMENT NOT NULL,
+    Username VARCHAR(20) NOT NULL,
     BookID INT NOT NULL,
     BorrowDate DATETIME NOT NULL,
     ReturnDate DATETIME NOT NULL,
     PRIMARY KEY (BorrowID),
-    FOREIGN KEY (BookID) REFERENCES Books(BookID)
+    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+    FOREIGN KEY (Username) REFERENCES User(Username)
 );
 
 CREATE TABLE ReadBooks (
     ReadID INT AUTO_INCREMENT NOT NULL,
+    Username VARCHAR(20) NOT NULL,
     BookID INT NOT NULL,
     PRIMARY KEY (ReadID),
-    FOREIGN KEY (BookID) REFERENCES Books(BookID)
+    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+    FOREIGN KEY (Username) REFERENCES User(Username)
 );
 
-CREATE TABLE PersonalBookshelf (
-    PersonalBookshelfID INT AUTO_INCREMENT NOT NULL,
-    UserID INT NOT NULL,
-    BorrowID INT NOT NULL,
-    ReadID INT NOT NULL,
-    PRIMARY KEY (PersonalBookshelfID),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (BorrowID) REFERENCES BorrowedBooks(BorrowID),
-    FOREIGN KEY (ReadID) REFERENCES ReadBooks(ReadID)
-);
+CREATE TABLE Logs (
+    LogID INT AUTO_INCREMENT NOT NULL,
+    Timestamp DATETIME NOT NULL,
+    Username VARCHAR(20) NOT NULL,
+    ActionDetails TEXT,
+    PRIMARY KEY (LogID),
+    FOREIGN KEY (Username) REFERENCES User(Username)
+)
