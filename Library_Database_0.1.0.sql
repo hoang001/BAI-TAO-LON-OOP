@@ -76,7 +76,7 @@ CREATE TABLE ReadBooks (
     BookID INT NOT NULL,
     PRIMARY KEY (ReadID),
     FOREIGN KEY (BookID) REFERENCES Books(BookID),
-    FOREIGN KEY (Username) REFERENCES User(Username)
+    FOREIGN KEY (Username) REFERENCES Users(Username)
 );
 
 CREATE TABLE Logs (
@@ -85,5 +85,5 @@ CREATE TABLE Logs (
     Username VARCHAR(20) NOT NULL,
     ActionDetails TEXT,
     PRIMARY KEY (LogID),
-    FOREIGN KEY (Username) REFERENCES User(Username)
+    FOREIGN KEY (Username) REFERENCES Users(Username)
 )
