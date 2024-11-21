@@ -37,6 +37,7 @@ CREATE TABLE Books (
     PublicationYear INT NOT NULL,
     CategoryID INT NOT NULL,
     BookCoverDirectory VARCHAR(100),
+    Available BOOLEAN NOT NULL,
     PRIMARY KEY (BookID),
     FOREIGN KEY (AuthorID) REFERENCES Authors(AuthorID),
     FOREIGN KEY (PublisherID) REFERENCES Publishers(PublisherID),
