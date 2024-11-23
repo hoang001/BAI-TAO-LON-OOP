@@ -2,46 +2,19 @@ DROP DATABASE IF EXISTS Library;
 CREATE DATABASE Library;
 USE Library;
 
-CREATE TABLE Authors (
-    AuthorID INT AUTO_INCREMENT NOT NULL,
-    AuthorName VARCHAR(50) NOT NULL,
-    DateOfBirth DATETIME,
-    Nationality VARCHAR(50),
-    PRIMARY KEY (AuthorID)
-);
-
-CREATE TABLE Publishers (
-    PublisherID INT AUTO_INCREMENT NOT NULL,
-    Name VARCHAR(100),
-    Address VARCHAR(200),
-    ContactEmail VARCHAR(50),
-    ContactPhone VARCHAR(20),
-    PRIMARY KEY (PublisherID),
-    UNIQUE (Name, Address, ContactEmail, ContactPhone)
-);
-
-CREATE TABLE Categories (
-    CategoryID INT AUTO_INCREMENT NOT NULL,
-    Category VARCHAR(50) NOT NULL,
-    Description TEXT NOT NULL,
-    PRIMARY KEY (CategoryID),
-    UNIQUE (Category)
-);
-
 CREATE TABLE Books (
     BookID INT AUTO_INCREMENT NOT NULL,
     ISBN VARCHAR(13) NOT NULL,
     Title VARCHAR(255) NOT NULL,
-    AuthorID INT NOT NULL,
-    PublisherID INT NOT NULL,
+    AuthorName VARCHAR,
+    PublisherName VARCHAR,
     PublicationYear INT NOT NULL,
-    CategoryID INT NOT NULL,
+    Category VARCHAR,
     BookCoverDirectory VARCHAR(100),
     Available BOOLEAN NOT NULL,
+    Quantity INT NOT NULL,
     PRIMARY KEY (BookID),
-    FOREIGN KEY (AuthorID) REFERENCES Authors(AuthorID),
-    FOREIGN KEY (PublisherID) REFERENCES Publishers(PublisherID),
-    FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID)
+    UNIQUE (ISBN)
 );
 
 CREATE TABLE Users (
@@ -68,7 +41,7 @@ CREATE TABLE BorrowedBooks (
     ReturnDate DATETIME NOT NULL,
     PRIMARY KEY (BorrowID),
     FOREIGN KEY (BookID) REFERENCES Books(BookID),
-    FOREIGN KEY (Username) REFERENCES User(Username)
+    FOREIGN KEY (Username) REFERENCES Users(Username)
 );
 
 CREATE TABLE ReadBooks (
@@ -96,5 +69,5 @@ CREATE TABLE Reviews (
     Rating INT NOT NULL,
     Comment TEXT,
     PRIMARY KEY (ReviewID),
-    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+    FOREIGN KEY (BookID) REFERENCES Books(BookID)
 );
