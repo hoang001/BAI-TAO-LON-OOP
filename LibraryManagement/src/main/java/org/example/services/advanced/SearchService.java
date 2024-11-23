@@ -1,18 +1,12 @@
 package org.example.services.advanced;
 
-import org.example.models.AuthorEntity;
 import org.example.models.BookEntity;
 import org.example.models.BorrowedBookEntity;
-import org.example.models.CategoryEntity;
-import org.example.models.PublisherEntity;
 import org.example.models.ReadBookEntity;
 import org.example.services.basics.BorrowedBookService;
-import org.example.services.basics.CategoryService;
 import org.example.services.basics.ReadBookService;
 import org.example.services.basics.UserService;
-import org.example.services.basics.AuthorService;
 import org.example.services.basics.BookService;
-import org.example.services.basics.PublisherService;
 
 import java.util.List;
 import java.sql.SQLException;
@@ -31,9 +25,6 @@ public class SearchService {
     private final ReadBookService readBookService;
     private final BookService bookService;
     private final UserService userService;
-    private final AuthorService authorService;
-    private final CategoryService categoryService;
-    private final PublisherService publisherService;
 
     /**
      * Constructor khởi tạo các service cần thiết
@@ -46,15 +37,11 @@ public class SearchService {
      * @param publisherService Service quản lý nhà xuất bản
      */
     public SearchService(BorrowedBookService borrowedBookService, ReadBookService readBookService,
-    BookService bookService, UserService userService, AuthorService authorService,
-    CategoryService categoryService, PublisherService publisherService) {
+    BookService bookService, UserService userService) {
         this.borrowedBookService = borrowedBookService;
         this.readBookService = readBookService;
         this.bookService = bookService;
         this.userService = userService;
-        this.authorService = authorService;
-        this.categoryService = categoryService;
-        this.publisherService = publisherService;
     }
 
     /**
@@ -110,8 +97,7 @@ public class SearchService {
             tasks.add(() -> sublist.stream()
                     .map(book -> {
                         // Lấy tên tác giả của cuốn sách
-                        AuthorEntity author = authorService.findAuthorById(book.getAuthorId());
-                        return author != null ? author.getName() : null; // Nếu tìm thấy tác giả, trả về tên
+                        return book.getAuthorName(); // Nếu tìm thấy tác giả, trả về tên
                     })
                     .filter(Objects::nonNull) // Lọc các kết quả không có tên tác giả
                     .filter(author -> author.toLowerCase().contains(normalizedKeyword)) // So sánh từ khóa với tên tác giả
@@ -134,10 +120,9 @@ public class SearchService {
         // Đưa các tác giả có trong sách đã đọc và sách đã mượn lên đầu
         List<String> prioritizedAuthors = new ArrayList<>();
         for (BookEntity book : allBooks) {
-            AuthorEntity author = authorService.findAuthorById(book.getAuthorId());
-            if (author != null && result.contains(author.getName())) {
-                prioritizedAuthors.add(author.getName());
-                result.remove(author.getName());
+            if (book != null && result.contains(book.getAuthorName())) {
+                prioritizedAuthors.add(book.getAuthorName());
+                result.remove(book.getAuthorName());
             }
         }
 
@@ -197,9 +182,7 @@ public class SearchService {
             final List<BookEntity> sublist = allBooks.subList(i, Math.min(i + partitionSize, allBooks.size()));
             tasks.add(() -> sublist.stream()
                     .map(book -> {
-                        // Lấy tên thể loại của cuốn sách
-                        CategoryEntity category = categoryService.findCategoryById(book.getCategoryId());
-                        return category != null ? category.getCategoryName() : null; // Nếu tìm thấy thể loại, trả về tên
+                        return book.getCategoryName(); // Nếu tìm thấy thể loại, trả về tên
                     })
                     .filter(Objects::nonNull) // Lọc các kết quả không có thể loại
                     .filter(category -> category.toLowerCase().contains(normalizedKeyword)) // So sánh từ khóa với tên thể loại
@@ -222,10 +205,9 @@ public class SearchService {
         // Đưa các thể loại có trong sách đã đọc và sách đã mượn lên đầu
         List<String> prioritizedCategories = new ArrayList<>();
         for (BookEntity book : allBooks) {
-            CategoryEntity category = categoryService.findCategoryById(book.getCategoryId());
-            if (category != null && result.contains(category.getCategoryName())) {
-                prioritizedCategories.add(category.getCategoryName());
-                result.remove(category.getCategoryName());
+            if (book != null && result.contains(book.getCategoryName())) {
+                prioritizedCategories.add(book.getCategoryName());
+                result.remove(book.getCategoryName());
             }
         }
 
@@ -285,9 +267,7 @@ public class SearchService {
             final List<BookEntity> sublist = allBooks.subList(i, Math.min(i + partitionSize, allBooks.size()));
             tasks.add(() -> sublist.stream()
                     .map(book -> {
-                        // Lấy tên nhà xuất bản của cuốn sách
-                        PublisherEntity publisher = publisherService.findPublisherById(book.getPublisherId());
-                        return publisher != null ? publisher.getPublisherName() : null; // Nếu tìm thấy nhà xuất bản, trả về tên
+                        return book.getPublisherName(); // Nếu tìm thấy nhà xuất bản, trả về tên
                     })
                     .filter(Objects::nonNull) // Lọc các kết quả không có nhà xuất bản
                     .filter(publisher -> publisher.toLowerCase().contains(normalizedKeyword)) // So sánh từ khóa với tên nhà xuất bản
@@ -310,10 +290,9 @@ public class SearchService {
         // Đưa các nhà xuất bản có trong sách đã đọc và sách đã mượn lên đầu
         List<String> prioritizedPublishers = new ArrayList<>();
         for (BookEntity book : allBooks) {
-            PublisherEntity publisher = publisherService.findPublisherById(book.getPublisherId());
-            if (publisher != null && result.contains(publisher.getPublisherName())) {
-                prioritizedPublishers.add(publisher.getPublisherName());
-                result.remove(publisher.getPublisherName());
+            if (book != null && result.contains(book.getPublisherName())) {
+                prioritizedPublishers.add(book.getPublisherName());
+                result.remove(book.getPublisherName());
             }
         }
 

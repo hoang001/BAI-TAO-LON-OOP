@@ -28,7 +28,7 @@ public class UserDaoImpl implements UserDao {
     public boolean registerUser(UserEntity user) throws SQLException {
         String sql = "INSERT INTO Users (userName, passwordHash, email, firstName, lastName, phoneNumber, profileImageDirectory) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(1, user.getUserName());
             preparedStatement.setString(2, user.getPasswordHash());
             preparedStatement.setString(3, user.getEmail());
             preparedStatement.setString(4, user.getFirstName());

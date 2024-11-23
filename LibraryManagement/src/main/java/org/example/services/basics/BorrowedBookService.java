@@ -74,7 +74,7 @@ public class BorrowedBookService {
             }
 
             // Ghi nhận mượn sách
-            Future<Boolean> futureBorrow = executorService.submit(() -> borrowedBookDao.borrowBook(bookId, currentUser.getName(), borrowDate));
+            Future<Boolean> futureBorrow = executorService.submit(() -> borrowedBookDao.borrowBook(bookId, currentUser.getUserName(), borrowDate));
             boolean result = futureBorrow.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
 
             if (result) {
@@ -83,14 +83,14 @@ public class BorrowedBookService {
                 if (!futureUpdate.get(5, TimeUnit.SECONDS)) {
                     throw new IllegalStateException("Không thể cập nhật trạng thái sách.");
                 }
-                logService.addLog(new LogEntity(LocalDateTime.now(), currentUser.getName(), "Mượn sách ID: " + bookId + " thành công"));
+                logService.addLog(new LogEntity(LocalDateTime.now(), currentUser.getUserName(), "Mượn sách ID: " + bookId + " thành công"));
             } else {
                 throw new IllegalStateException("Không thể ghi nhận mượn sách.");
             }
             return result;
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
             logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getName() : "unknown", 
+                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
                 "Lỗi khi mượn sách: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
             return false;
@@ -113,7 +113,7 @@ public class BorrowedBookService {
             }
 
             // Ghi nhận trả sách
-            Future<Boolean> futureReturn = executorService.submit(() -> borrowedBookDao.returnBook(bookId, currentUser.getName()));
+            Future<Boolean> futureReturn = executorService.submit(() -> borrowedBookDao.returnBook(bookId, currentUser.getUserName()));
             boolean result = futureReturn.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
 
             if (result) {
@@ -122,14 +122,14 @@ public class BorrowedBookService {
                 if (!futureUpdate.get(5, TimeUnit.SECONDS)) {
                     throw new IllegalStateException("Không thể cập nhật trạng thái sách.");
                 }
-                logService.addLog(new LogEntity(LocalDateTime.now(), currentUser.getName(), "Trả sách ID: " + bookId + " thành công"));
+                logService.addLog(new LogEntity(LocalDateTime.now(), currentUser.getUserName(), "Trả sách ID: " + bookId + " thành công"));
             } else {
                 throw new IllegalStateException("Không thể ghi nhận trả sách.");
             }
             return result;
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
             logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getName() : "unknown", 
+                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
                 "Lỗi khi trả sách: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
             return false;
@@ -150,11 +150,11 @@ public class BorrowedBookService {
             }
 
             // Tìm danh sách sách chưa trả
-            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> borrowedBookDao.findNotReturnedBooksByUser(currentUser.getName()));
+            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> borrowedBookDao.findNotReturnedBooksByUser(currentUser.getUserName()));
             return futureBooks.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
             logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getName() : "unknown", 
+                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
                 "Lỗi khi lấy danh sách sách chưa trả: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
             return null;
@@ -177,11 +177,11 @@ public class BorrowedBookService {
             }
 
             // Tìm danh sách sách mượn trong khoảng thời gian
-            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> borrowedBookDao.findBorrowedBooksByUser(currentUser.getName(), startDate, endDate));
+            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> borrowedBookDao.findBorrowedBooksByUser(currentUser.getUserName(), startDate, endDate));
             return futureBooks.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
             logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getName() : "unknown", 
+                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
                 "Lỗi khi tìm sách đã mượn: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
             return null;
@@ -202,11 +202,11 @@ public class BorrowedBookService {
             }
 
             // Lấy số lượng sách đã mượn
-            Future<Integer> futureCount = executorService.submit(() -> borrowedBookDao.getBorrowedBooksCountByUser(currentUser.getName()));
+            Future<Integer> futureCount = executorService.submit(() -> borrowedBookDao.getBorrowedBooksCountByUser(currentUser.getUserName()));
             return futureCount.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
             logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getName() : "unknown", 
+                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
                 "Lỗi khi lấy số lượng sách đã mượn: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
             return 0;
@@ -227,11 +227,11 @@ public class BorrowedBookService {
             }
 
             // Thực thi trong một luồng riêng biệt
-            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> borrowedBookDao.findAllBorrowedBooksByUser(currentUser.getName()));
+            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> borrowedBookDao.findAllBorrowedBooksByUser(currentUser.getUserName()));
             return futureBooks.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
             logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getName() : "unknown", 
+                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
                 "Lỗi khi lấy tất cả sách đã mượn: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
             return null;

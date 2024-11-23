@@ -26,9 +26,9 @@ public class UserService {
 
     public boolean registerUser(UserEntity user) {
         try {
-            if (user.getName() == null || user.getPasswordHash() == null || user.getEmail() == null ||
+            if (user.getUserName() == null || user.getPasswordHash() == null || user.getEmail() == null ||
                     user.getFirstName() == null || user.getLastName() == null || user.getPhoneNumber() == null ||
-                    user.getName().trim().isEmpty() || user.getPasswordHash().trim().isEmpty() || user.getEmail().trim().isEmpty() ||
+                    user.getUserName().trim().isEmpty() || user.getPasswordHash().trim().isEmpty() || user.getEmail().trim().isEmpty() ||
                     user.getFirstName().trim().isEmpty() || user.getLastName().trim().isEmpty() || user.getPhoneNumber().trim().isEmpty()) {
                 logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Chưa nhập đủ thông tin"));
                 throw new IllegalArgumentException("Chưa nhập đủ thông tin");
@@ -41,7 +41,7 @@ public class UserService {
                 logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Số điện thoại không hợp lệ"));
                 throw new IllegalArgumentException("Số điện thoại không hợp lệ");
             }
-            if (user.getName().length() > 20) {
+            if (user.getUserName().length() > 20) {
                 logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Tên người dùng vượt quá giới hạn 20 ký tự"));
                 throw new IllegalArgumentException("Tên người dùng vượt quá giới hạn 20 ký tự");
             }
@@ -69,7 +69,7 @@ public class UserService {
                 logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Đường dẫn ảnh đại diện vượt quá giới hạn 100 ký tự"));
                 throw new IllegalArgumentException("Đường dẫn ảnh đại diện vượt quá giới hạn 100 ký tự");
             }
-            if (UserDao.isUsernameTaken(user.getName())) {
+            if (UserDao.isUsernameTaken(user.getUserName())) {
                 logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Tên người dùng đã tồn tại"));
                 throw new IllegalStateException("Tên người dùng đã tồn tại");
             }
@@ -84,7 +84,7 @@ public class UserService {
     
             boolean result = UserDao.registerUser(user);
             if (result) {
-                logService.addLog(new LogEntity(LocalDateTime.now(), user.getName(), "Đăng ký thành công"));
+                logService.addLog(new LogEntity(LocalDateTime.now(), user.getUserName(), "Đăng ký thành công"));
             }
             return result;
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -127,7 +127,7 @@ public class UserService {
     public boolean logoutUser() {
         try {
             if (loginUser != null) {
-                logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getName(), "Đăng xuất"));
+                logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Đăng xuất"));
                 loginUser = null;
                 return true;
             }
@@ -149,7 +149,7 @@ public class UserService {
     
             boolean result = UserDao.changePassword(loginUser.getId(), newPassword);
             if (result) {
-                logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getName(), "Thay đổi mật khẩu"));
+                logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Thay đổi mật khẩu"));
             }
             return result;
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -186,7 +186,7 @@ public class UserService {
     
             boolean result = UserDao.updateEmail(loginUser.getId(), newEmail);
             if (result) {
-                logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getName(), "Cập nhật email"));
+                logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Cập nhật email"));
             }
             return result;
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -225,7 +225,7 @@ public class UserService {
     
             boolean result = UserDao.updatePhoneNumber(loginUser.getId(), newPhoneNumber);
             if (result) {
-                logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getName(), "Cập nhật số điện thoại"));
+                logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Cập nhật số điện thoại"));
             }
             return result;
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -250,7 +250,7 @@ public class UserService {
     
             boolean result = UserDao.updateProfileImage(loginUser.getId(), newProfileImageDirectory);
             if (result) {
-                logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getName(), "Cập nhật ảnh đại diện"));
+                logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Cập nhật ảnh đại diện"));
             }
             return result;
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -269,7 +269,7 @@ public class UserService {
             }
     
             UserEntity userInfo = UserDao.getUserInfo(loginUser.getId());
-            logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getName(), "Xem thông tin tài khoản"));
+            logService.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Xem thông tin tài khoản"));
             return userInfo;
         } catch (IllegalStateException e) {
             System.out.println("Lỗi lấy thông tin tài khoản: " + e.getMessage());

@@ -57,7 +57,7 @@ public class ReviewService {
             }
 
             // Thực hiện thêm nhận xét vào cơ sở dữ liệu
-            return reviewDao.addReview(userService.getLoginUser().getName(), bookId, rating, comment);
+            return reviewDao.addReview(userService.getLoginUser().getUserName(), bookId, rating, comment);
         } catch (IllegalStateException | IllegalArgumentException e) {
             System.out.println("Lỗi: " + e.getMessage());
             return false;
@@ -104,7 +104,7 @@ public class ReviewService {
             }
 
             // Truy vấn danh sách nhận xét từ cơ sở dữ liệu
-            return reviewDao.getReviewsByUserName(userService.getLoginUser().getName());
+            return reviewDao.getReviewsByUserName(userService.getLoginUser().getUserName());
         } catch (IllegalStateException e) {
             System.out.println("Lỗi: " + e.getMessage());
             return Collections.emptyList();

@@ -63,7 +63,7 @@ public class ReadBookService {
             }
 
             // Lấy tên người dùng hiện tại
-            String userName = userService.getLoginUser().getName();
+            String userName = userService.getLoginUser().getUserName();
             if (userName == null || userName.trim().isEmpty()) {
                 throw new IllegalArgumentException("Tên người dùng không hợp lệ");
             }
@@ -104,7 +104,7 @@ public class ReadBookService {
             }
 
             // Lấy tên người dùng hiện tại
-            String userName = userService.getLoginUser().getName();
+            String userName = userService.getLoginUser().getUserName();
             if (userName == null || userName.trim().isEmpty()) {
                 throw new IllegalArgumentException("Tên người dùng không hợp lệ");
             }
@@ -145,7 +145,7 @@ public class ReadBookService {
             }
 
             // Lấy tên người dùng hiện tại
-            String userName = userService.getLoginUser().getName();
+            String userName = userService.getLoginUser().getUserName();
             if (userName == null || userName.trim().isEmpty()) {
                 throw new IllegalArgumentException("Tên người dùng không hợp lệ");
             }
@@ -190,7 +190,7 @@ public class ReadBookService {
             }
 
             // Lấy tên người dùng hiện tại
-            String userName = userService.getLoginUser().getName();
+            String userName = userService.getLoginUser().getUserName();
             if (userName == null || userName.trim().isEmpty()) {
                 throw new IllegalArgumentException("Tên người dùng không hợp lệ");
             }
