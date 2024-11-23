@@ -87,4 +87,14 @@ CREATE TABLE Logs (
     ActionDetails TEXT,
     PRIMARY KEY (LogID),
     FOREIGN KEY (Username) REFERENCES Users(Username)
-)
+);
+
+CREATE TABLE Reviews (
+    ReviewID INT AUTO_INCREMENT NOT NULL,
+    Username VARCHAR(20) NOT NULL,
+    BookID INT NOT NULL,
+    Rating INT NOT NULL,
+    Comment TEXT,
+    PRIMARY KEY (ReviewID),
+    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+);
