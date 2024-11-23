@@ -37,6 +37,7 @@ CREATE TABLE Books (
     PublicationYear INT NOT NULL,
     CategoryID INT NOT NULL,
     BookCoverDirectory VARCHAR(100),
+    Available BOOLEAN NOT NULL,
     PRIMARY KEY (BookID),
     FOREIGN KEY (AuthorID) REFERENCES Authors(AuthorID),
     FOREIGN KEY (PublisherID) REFERENCES Publishers(PublisherID),
@@ -76,7 +77,7 @@ CREATE TABLE ReadBooks (
     BookID INT NOT NULL,
     PRIMARY KEY (ReadID),
     FOREIGN KEY (BookID) REFERENCES Books(BookID),
-    FOREIGN KEY (Username) REFERENCES User(Username)
+    FOREIGN KEY (Username) REFERENCES Users(Username)
 );
 
 CREATE TABLE Logs (
@@ -85,5 +86,15 @@ CREATE TABLE Logs (
     Username VARCHAR(20) NOT NULL,
     ActionDetails TEXT,
     PRIMARY KEY (LogID),
-    FOREIGN KEY (Username) REFERENCES User(Username)
-)
+    FOREIGN KEY (Username) REFERENCES Users(Username)
+);
+
+CREATE TABLE Reviews (
+    ReviewID INT AUTO_INCREMENT NOT NULL,
+    Username VARCHAR(20) NOT NULL,
+    BookID INT NOT NULL,
+    Rating INT NOT NULL,
+    Comment TEXT,
+    PRIMARY KEY (ReviewID),
+    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+);
