@@ -6,52 +6,54 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Giao diện quản lý các log trong hệ thống.
+ * Interface quản lý các log trong hệ thống.
+ * Cung cấp các phương thức để thêm log mới, lấy tất cả log, tìm log theo ID,
+ * lấy log theo tên người dùng và lấy log trong khoảng thời gian cụ thể.
  */
 public interface LogDao {
 
     /**
      * Thêm một log mới vào cơ sở dữ liệu.
      *
-     * @param logEntity đối tượng LogEntity chứa thông tin log cần thêm.
+     * @param logEntity Đối tượng LogEntity chứa thông tin log cần thêm.
      * @return true nếu thêm log thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
     boolean addLog(LogEntity logEntity) throws SQLException;
 
     /**
-     * Lấy tất cả các log từ hệ thống.
+     * Tìm tất cả các log từ hệ thống.
      *
-     * @return danh sách các đối tượng LogEntity chứa tất cả các log.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @return Danh sách các đối tượng LogEntity chứa tất cả các log.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
-    List<LogEntity> getAllLogs() throws SQLException;
+    List<LogEntity> findAllLogs() throws SQLException;
 
     /**
      * Lấy một log theo ID.
      *
      * @param logId ID của log cần lấy.
-     * @return đối tượng LogEntity chứa thông tin log, hoặc null nếu không tìm thấy.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @return Đối tượng LogEntity chứa thông tin log, hoặc null nếu không tìm thấy.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
-    LogEntity getLogById(int logId) throws SQLException;
+    LogEntity findLogById(int logId) throws SQLException;
 
     /**
      * Lấy các log theo tên người dùng (userName).
      *
-     * @param userName tên người dùng cần lấy log.
-     * @return danh sách các đối tượng LogEntity chứa thông tin các log của người dùng.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @param userName Tên người dùng cần lấy log.
+     * @return Danh sách các đối tượng LogEntity chứa thông tin các log của người dùng.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
-    List<LogEntity> getLogsByUserName(String userName) throws SQLException;
+    List<LogEntity> findLogsByUserName(String userName) throws SQLException;
 
     /**
      * Lấy các log trong một khoảng thời gian từ startDate đến endDate.
      *
-     * @param startDate thời gian bắt đầu của khoảng thời gian.
-     * @param endDate   thời gian kết thúc của khoảng thời gian.
-     * @return danh sách các đối tượng LogEntity chứa thông tin các log trong khoảng thời gian đã chỉ định.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @param startDate Thời gian bắt đầu của khoảng thời gian.
+     * @param endDate   Thời gian kết thúc của khoảng thời gian.
+     * @return Danh sách các đối tượng LogEntity chứa thông tin các log trong khoảng thời gian đã chỉ định.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
-    List<LogEntity> getLogsByTimeRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException;
+    List<LogEntity> findLogsByTimeRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException;
 }

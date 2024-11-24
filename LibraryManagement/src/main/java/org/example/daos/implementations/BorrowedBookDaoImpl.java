@@ -76,7 +76,7 @@ public class BorrowedBookDaoImpl implements BorrowedBookDao {
     }
 
     /**
-     * Tìm tất cả sách đã mượn của người dùng trong khoảng thời gian cho trước.
+     * Lấy tất cả sách đã mượn của người dùng trong khoảng thời gian cho trước.
      * 
      * @param userName  Tên người mượn sách
      * @param startDate Ngày bắt đầu tìm kiếm
@@ -162,7 +162,7 @@ public class BorrowedBookDaoImpl implements BorrowedBookDao {
      * @throws SQLException Nếu có lỗi trong quá trình truy vấn cơ sở dữ liệu
      */
     @Override
-    public int getBorrowedBooksCountByUser(String userName) throws SQLException {
+    public int findBorrowedBooksCountByUser(String userName) throws SQLException {
         String query = "SELECT COUNT(DISTINCT bookId) FROM BorrowedBooks WHERE userName = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, userName);

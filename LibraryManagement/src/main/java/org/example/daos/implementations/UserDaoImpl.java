@@ -2,7 +2,9 @@ package org.example.daos.implementations;
 
 import org.example.daos.interfaces.UserDao;
 import org.example.models.UserEntity;
+import org.example.models.UserEntity.Roles;
 import org.example.utils.DatabaseConnection;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 
@@ -26,15 +28,19 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public boolean registerUser(UserEntity user) throws SQLException {
-        String sql = "INSERT INTO Users (userName, passwordHash, email, firstName, lastName, phoneNumber, profileImageDirectory) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        // Mã hóa mật khẩu trước khi lưu vào cơ sở dữ liệu
+        String hashedPassword = BCrypt.hashpw(user.getPasswordHash(), BCrypt.gensalt());
+
+        String sql = "INSERT INTO Users (Username, PasswordHash, Email, FirstName, LastName, PhoneNumber, ProfileImageDirectory, Role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, user.getUserName());
-            preparedStatement.setString(2, user.getPasswordHash());
+            preparedStatement.setString(2, hashedPassword);  // Lưu mật khẩu đã mã hóa
             preparedStatement.setString(3, user.getEmail());
             preparedStatement.setString(4, user.getFirstName());
             preparedStatement.setString(5, user.getLastName());
             preparedStatement.setString(6, user.getPhoneNumber());
             preparedStatement.setString(7, user.getProfileImageDirectory());
+            preparedStatement.setString(8, user.getRole().name());  // Lưu vai trò người dùng (Role)
             int result = preparedStatement.executeUpdate();
             return result > 0;
         }
@@ -50,22 +56,27 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public UserEntity loginUser(String userName, String password) throws SQLException {
-        String sql = "SELECT * FROM Users WHERE userName = ? AND passwordHash = ?";
+        String sql = "SELECT * FROM Users WHERE userName = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, userName);
-            preparedStatement.setString(2, password);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                return new UserEntity(
-                        resultSet.getInt("userId"),
-                        resultSet.getString("userName"),
-                        resultSet.getString("passwordHash"),
-                        resultSet.getString("email"),
-                        resultSet.getString("firstName"),
-                        resultSet.getString("lastName"),
-                        resultSet.getString("phoneNumber"),
-                        resultSet.getString("profileImageDirectory")
-                );
+                String storedPasswordHash = resultSet.getString("PasswordHash");
+                // Kiểm tra mật khẩu người dùng nhập vào có khớp với mật khẩu đã mã hóa trong cơ sở dữ liệu
+                if (BCrypt.checkpw(password, storedPasswordHash)) {
+                    return new UserEntity(
+                            // resultSet.getInt("UserID"),
+                            resultSet.getString("Username"),
+                            resultSet.getString("PasswordHash"),
+                            resultSet.getString("Email"),
+                            resultSet.getString("FirstName"),
+                            resultSet.getString("LastName"),
+                            resultSet.getString("PhoneNumber"),
+                            resultSet.getString("ProfileImageDirectory")
+                            // Lấy và gán vai trò từ cơ sở dữ liệu
+                            // Roles.valueOf(resultSet.getString("Role"))
+                    );
+                }
             }
         }
         return null;
@@ -81,9 +92,10 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public boolean changePassword(int userId, String newPassword) throws SQLException {
+        String newHashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
         String sql = "UPDATE Users SET passwordHash = ? WHERE userId = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, newPassword);
+            preparedStatement.setString(1, newHashedPassword);
             preparedStatement.setInt(2, userId);
             int result = preparedStatement.executeUpdate();
             return result > 0;
@@ -148,28 +160,29 @@ public class UserDaoImpl implements UserDao {
     }
 
     /**
-     * Lấy thông tin người dùng từ cơ sở dữ liệu.
+     * Tìm thông tin người dùng từ cơ sở dữ liệu.
      * 
      * @param userId ID của người dùng cần lấy thông tin.
      * @return đối tượng UserEntity chứa thông tin người dùng, null nếu không tìm thấy.
      * @throws SQLException khi xảy ra lỗi trong quá trình truy vấn cơ sở dữ liệu.
      */
     @Override
-    public UserEntity getUserInfo(int userId) throws SQLException {
+    public UserEntity findUserInfo(int userId) throws SQLException {
         String sql = "SELECT * FROM Users WHERE userId = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, userId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return new UserEntity(
-                            resultSet.getInt("userId"),
-                            resultSet.getString("userName"),
-                            resultSet.getString("passwordHash"),
-                            resultSet.getString("email"),
-                            resultSet.getString("firstName"),
-                            resultSet.getString("lastName"),
-                            resultSet.getString("phoneNumber"),
-                            resultSet.getString("profileImageDirectory")
+                        // resultSet.getInt("UserID"),
+                        resultSet.getString("Username"),
+                        resultSet.getString("PasswordHash"),
+                        resultSet.getString("Email"),
+                        resultSet.getString("FirstName"),
+                        resultSet.getString("LastName"),
+                        resultSet.getString("PhoneNumber"),
+                        resultSet.getString("ProfileImageDirectory")
+                        // Roles.valueOf(resultSet.getString("Role"))  // Gán vai trò từ cơ sở dữ liệu
                     );
                 }
             }

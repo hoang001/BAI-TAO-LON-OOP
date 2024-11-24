@@ -4,102 +4,103 @@ import org.example.models.UserEntity;
 import java.sql.SQLException;
 
 /**
- * Giao diện cho các thao tác CRUD đối với người dùng.
+ * Interface cho các thao tác CRUD đối với người dùng.
+ * Cung cấp các phương thức để đăng ký, đăng nhập, thay đổi mật khẩu, và cập nhật thông tin người dùng.
  */
 public interface UserDao {
 
     /**
-     * Đăng ký người dùng mới.
+     * Đăng ký người dùng mới vào hệ thống.
      *
-     * @param user đối tượng UserEntity chứa thông tin người dùng cần đăng ký.
+     * @param user Đối tượng UserEntity chứa thông tin người dùng cần đăng ký.
      * @return true nếu đăng ký thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
     boolean registerUser(UserEntity user) throws SQLException;
 
     /**
-     * Đăng nhập người dùng.
+     * Đăng nhập người dùng bằng tên người dùng và mật khẩu.
      *
-     * @param userName tên người dùng.
-     * @param password mật khẩu của người dùng.
-     * @return đối tượng UserEntity chứa thông tin người dùng nếu đăng nhập thành công, null nếu không thành công.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @param userName Tên người dùng.
+     * @param password Mật khẩu của người dùng.
+     * @return Đối tượng UserEntity chứa thông tin người dùng nếu đăng nhập thành công, null nếu không thành công.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
     UserEntity loginUser(String userName, String password) throws SQLException;
 
     /**
-     * Thay đổi mật khẩu người dùng.
+     * Thay đổi mật khẩu của người dùng.
      *
-     * @param userId    ID của người dùng cần thay đổi mật khẩu.
-     * @param newPassword mật khẩu mới.
+     * @param userId ID của người dùng cần thay đổi mật khẩu.
+     * @param newPassword Mật khẩu mới.
      * @return true nếu thay đổi mật khẩu thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
     boolean changePassword(int userId, String newPassword) throws SQLException;
 
     /**
-     * Cập nhật email người dùng.
+     * Cập nhật email của người dùng.
      *
-     * @param userId    ID của người dùng cần cập nhật email.
-     * @param newEmail email mới của người dùng.
+     * @param userId ID của người dùng cần cập nhật email.
+     * @param newEmail Email mới của người dùng.
      * @return true nếu cập nhật email thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
     boolean updateEmail(int userId, String newEmail) throws SQLException;
 
     /**
-     * Cập nhật số điện thoại người dùng.
+     * Cập nhật số điện thoại của người dùng.
      *
-     * @param userId        ID của người dùng cần cập nhật số điện thoại.
-     * @param newPhoneNumber số điện thoại mới của người dùng.
+     * @param userId ID của người dùng cần cập nhật số điện thoại.
+     * @param newPhoneNumber Số điện thoại mới của người dùng.
      * @return true nếu cập nhật số điện thoại thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
     boolean updatePhoneNumber(int userId, String newPhoneNumber) throws SQLException;
 
     /**
-     * Cập nhật ảnh hồ sơ người dùng.
+     * Cập nhật ảnh hồ sơ của người dùng.
      *
-     * @param userId                ID của người dùng cần cập nhật ảnh hồ sơ.
-     * @param newProfileImageDirectory đường dẫn tới ảnh hồ sơ mới.
+     * @param userId ID của người dùng cần cập nhật ảnh hồ sơ.
+     * @param newProfileImageDirectory Đường dẫn tới ảnh hồ sơ mới.
      * @return true nếu cập nhật ảnh hồ sơ thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
     boolean updateProfileImage(int userId, String newProfileImageDirectory) throws SQLException;
 
     /**
-     * Lấy thông tin của người dùng.
+     * Lấy thông tin người dùng dựa trên ID.
      *
      * @param userId ID của người dùng cần lấy thông tin.
-     * @return đối tượng UserEntity chứa thông tin người dùng.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @return Đối tượng UserEntity chứa thông tin người dùng.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
-    UserEntity getUserInfo(int userId) throws SQLException;
+    UserEntity findUserInfo(int userId) throws SQLException;
 
     /**
-     * Kiểm tra xem username đã tồn tại hay chưa.
+     * Kiểm tra xem tên người dùng đã tồn tại hay chưa.
      *
-     * @param userName tên người dùng cần kiểm tra.
-     * @return true nếu username đã tồn tại, false nếu chưa tồn tại.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @param userName Tên người dùng cần kiểm tra.
+     * @return true nếu tên người dùng đã tồn tại, false nếu chưa tồn tại.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
     boolean isUsernameTaken(String userName) throws SQLException;
 
     /**
-     * Kiểm tra xem email đã tồn tại hay chưa.
+     * Kiểm tra xem email đã được sử dụng hay chưa.
      *
-     * @param email email cần kiểm tra.
+     * @param email Email cần kiểm tra.
      * @return true nếu email đã tồn tại, false nếu chưa tồn tại.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
     boolean isEmailTaken(String email) throws SQLException;
 
     /**
-     * Kiểm tra xem số điện thoại đã tồn tại hay chưa.
+     * Kiểm tra xem số điện thoại đã được sử dụng hay chưa.
      *
-     * @param phoneNumber số điện thoại cần kiểm tra.
+     * @param phoneNumber Số điện thoại cần kiểm tra.
      * @return true nếu số điện thoại đã tồn tại, false nếu chưa tồn tại.
-     * @throws SQLException nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
     boolean isPhoneNumberTaken(String phoneNumber) throws SQLException;
 }

@@ -28,7 +28,7 @@ public class BookDaoImpl implements BookDao {
      */
     @Override
     public boolean addBook(BookEntity book) throws SQLException {
-        String sql = "INSERT INTO Books (isbn, title, authorId, publisherId, publicationYear, categoryId, bookCoverDirectory) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Books (isbn, title, authorId, publisherId, publicationYear, categoryId, bookCoverDirectory, Quantity) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, book.getIsbn());
             preparedStatement.setString(2, book.getTitle());
@@ -37,6 +37,7 @@ public class BookDaoImpl implements BookDao {
             preparedStatement.setInt(5, book.getPublicationYear());
             preparedStatement.setString(6, book.getCategoryName());
             preparedStatement.setString(7, book.getBookCoverDirectory());
+            preparedStatement.setInt(8, book.getQuantity());
             int result = preparedStatement.executeUpdate();
             return result > 0; // Trả về true nếu có ít nhất 1 bản ghi được thêm vào cơ sở dữ liệu
         }
@@ -120,6 +121,16 @@ public class BookDaoImpl implements BookDao {
         }
     }
 
+    public boolean updateBookQuantity(String isbn, int quantity) throws SQLException {
+        String query = "UPDATE Books SET quantity = quantity + ? WHERE isbn = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, quantity);
+            statement.setString(2, isbn);
+            int result = statement.executeUpdate();
+            return result > 0;
+        }
+    }    
+
     /**
      * Tìm sách theo ID.
      * 
@@ -144,7 +155,8 @@ public class BookDaoImpl implements BookDao {
                         resultSet.getInt("PublicationYear"),
                         resultSet.getString("CategoryName"),
                         resultSet.getString("BookCoverDirectory"),
-                        resultSet.getBoolean("Available")
+                        resultSet.getBoolean("Available"),
+                        resultSet.getInt("Quantity")
                 );
             }
         }
@@ -159,26 +171,26 @@ public class BookDaoImpl implements BookDao {
      * @throws SQLException Nếu có lỗi khi thực hiện câu lệnh SQL.
      */
     @Override
-    public List<BookEntity> findBookByIsbn(String isbn) throws SQLException {
+    public BookEntity findBookByIsbn(String isbn) throws SQLException {
         String query = "SELECT * FROM Books WHERE isbn = ?";
-        List<BookEntity> books = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, isbn);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                books.add(new BookEntity(
-                    resultSet.getInt("BookID"),
-                    resultSet.getString("ISBN"),
-                    resultSet.getString("Title"),
-                    resultSet.getString("AuthorName"),
-                    resultSet.getString("PublisherName"),
-                    resultSet.getInt("PublicationYear"),
-                    resultSet.getString("CategoryName"),
-                    resultSet.getString("BookCoverDirectory"),
-                    resultSet.getBoolean("Available")
-                ));
+                return new BookEntity(
+                        resultSet.getInt("BookID"),
+                        resultSet.getString("ISBN"),
+                        resultSet.getString("Title"),
+                        resultSet.getString("AuthorName"),
+                        resultSet.getString("PublisherName"),
+                        resultSet.getInt("PublicationYear"),
+                        resultSet.getString("CategoryName"),
+                        resultSet.getString("BookCoverDirectory"),
+                        resultSet.getBoolean("Available"),
+                        resultSet.getInt("Quantity")
+                );
             }
-            return books; // Trả về danh sách sách tìm được
+            return null; // Trả về danh sách sách tìm được
         }
     }
 
@@ -206,7 +218,8 @@ public class BookDaoImpl implements BookDao {
                     resultSet.getInt("PublicationYear"),
                     resultSet.getString("CategoryName"),
                     resultSet.getString("BookCoverDirectory"),
-                    resultSet.getBoolean("Available")
+                    resultSet.getBoolean("Available"),
+                    resultSet.getInt("Quantity")
                 ));
             }
         }
@@ -237,7 +250,8 @@ public class BookDaoImpl implements BookDao {
                     resultSet.getInt("PublicationYear"),
                     resultSet.getString("CategoryName"),
                     resultSet.getString("BookCoverDirectory"),
-                    resultSet.getBoolean("Available")
+                    resultSet.getBoolean("Available"),
+                    resultSet.getInt("Quantity")
                 ));
             }
         }
@@ -268,38 +282,8 @@ public class BookDaoImpl implements BookDao {
                     resultSet.getInt("PublicationYear"),
                     resultSet.getString("CategoryName"),
                     resultSet.getString("BookCoverDirectory"),
-                    resultSet.getBoolean("Available")
-                ));
-            }
-        }
-        return books; // Trả về danh sách sách tìm được
-    }
-
-    /**
-     * Tìm sách theo năm xuất bản.
-     * 
-     * @param year Năm xuất bản của sách cần tìm.
-     * @return Danh sách sách tìm được.
-     * @throws SQLException Nếu có lỗi khi thực hiện câu lệnh SQL.
-     */
-    @Override
-    public List<BookEntity> findBooksByYear(int year) throws SQLException {
-        String query = "SELECT * FROM Books WHERE publicationYear = ?";
-        List<BookEntity> books = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setInt(1, year);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                books.add(new BookEntity(
-                    resultSet.getInt("BookID"),
-                    resultSet.getString("ISBN"),
-                    resultSet.getString("Title"),
-                    resultSet.getString("AuthorName"),
-                    resultSet.getString("PublisherName"),
-                    resultSet.getInt("PublicationYear"),
-                    resultSet.getString("CategoryName"),
-                    resultSet.getString("BookCoverDirectory"),
-                    resultSet.getBoolean("Available")
+                    resultSet.getBoolean("Available"),
+                    resultSet.getInt("Quantity")
                 ));
             }
         }
@@ -330,7 +314,8 @@ public class BookDaoImpl implements BookDao {
                     resultSet.getInt("PublicationYear"),
                     resultSet.getString("CategoryName"),
                     resultSet.getString("BookCoverDirectory"),
-                    resultSet.getBoolean("Available")
+                    resultSet.getBoolean("Available"),
+                    resultSet.getInt("Quantity")
                 ));
             }
         }
@@ -344,7 +329,7 @@ public class BookDaoImpl implements BookDao {
      * @throws SQLException Nếu có lỗi khi thực hiện câu lệnh SQL.
      */
     @Override
-    public List<BookEntity> getAllBooks() throws SQLException {
+    public List<BookEntity> findAllBooks() throws SQLException {
         String query = "SELECT * FROM Books";
         List<BookEntity> books = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -359,32 +344,47 @@ public class BookDaoImpl implements BookDao {
                     resultSet.getInt("PublicationYear"),
                     resultSet.getString("CategoryName"),
                     resultSet.getString("BookCoverDirectory"),
-                    resultSet.getBoolean("Available")
+                    resultSet.getBoolean("Available"),
+                    resultSet.getInt("Quantity")
                 ));
             }
         }
         return books; // Trả về danh sách tất cả sách
     }
 
-    /**
-     * Đếm số lượng sách có sẵn theo ISBN.
-     * 
-     * @param isbn ISBN của sách cần đếm.
-     * @return Số lượng sách có sẵn.
-     * @throws SQLException Nếu có lỗi khi thực hiện câu lệnh SQL.
-     */
-    @Override
-    public int countAvailableBooksByIsbn(String isbn) throws SQLException {
-        String query = "SELECT COUNT(*) FROM Books WHERE ISBN = ? AND Available = TRUE";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, isbn);
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                return resultSet.getInt(1);
+    public boolean isBookInDatabase(String isbn) throws SQLException {
+        String query = "SELECT COUNT(*) FROM Books WHERE isbn = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, isbn);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
             }
         }
-
-        return 0; // Nếu không có sách nào có sẵn, trả về 0
+        return false;
     }
+    
+
+    // /**
+    //  * Đếm số lượng sách có sẵn theo ISBN.
+    //  * 
+    //  * @param isbn ISBN của sách cần đếm.
+    //  * @return Số lượng sách có sẵn.
+    //  * @throws SQLException Nếu có lỗi khi thực hiện câu lệnh SQL.
+    //  */
+    // @Override
+    // public int countAvailableBooksByIsbn(String isbn) throws SQLException {
+    //     String query = "SELECT COUNT(*) FROM Books WHERE ISBN = ? AND Available = TRUE";
+    //     try (PreparedStatement statement = connection.prepareStatement(query)) {
+    //         statement.setString(1, isbn);
+    //         ResultSet resultSet = statement.executeQuery();
+
+    //         if (resultSet.next()) {
+    //             return resultSet.getInt(1);
+    //         }
+    //     }
+
+    //     return 0; // Nếu không có sách nào có sẵn, trả về 0
+    // }
 }

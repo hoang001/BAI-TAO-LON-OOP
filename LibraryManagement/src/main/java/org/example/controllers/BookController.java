@@ -19,46 +19,46 @@ public class BookController {
         bookService.addBook(book);
     }
 
-    // Gọi dịch vụ để xóa sách dựa trên ISBN
-    public void deleteBookByISBN(String isbn) {
-        bookService.deleteBookByISBN(isbn);
+    // Gọi dịch vụ để xóa sách dựa trên Isbn
+    public void deleteBookByIsbn(String Isbn) {
+        bookService.deleteBookByIsbn(Isbn);
     }
 
     public void deleteBookByID(int bookId) {
-        bookService.deleteBookByID(bookId);
+        bookService.deleteBookById(bookId);
     }
 
     public void updateBook(BookEntity BookEntity) {
         bookService.updateBook(BookEntity);
     }
 
-    public BookEntity findBookEntityByID(int bookId) {
-        return bookService.findBookEntityById(bookId);
+    public BookEntity getBookByID(int bookId) {
+        return bookService.getBookById(bookId);
     }
 
-    // Gọi dịch vụ để tìm sách dựa trên ISBN
-    public List<BookEntity> findBookByISBN(String isbn) {
-        return bookService.findBookByISBN(isbn);
+    // Gọi dịch vụ để tìm sách dựa trên Isbn
+    public BookEntity getBookByIsbn(String Isbn) {
+        return bookService.getBookByIsbn(Isbn);
     }
 
     // Gọi dịch vụ để tìm sách theo tiêu đề
-    public List<BookEntity> findBooksByTitle(String title) {
-        return bookService.findBooksByTitle(title);
+    public List<BookEntity> getBooksByTitle(String title) {
+        return bookService.getBooksByTitle(title);
     }
 
     // Gọi dịch vụ để tìm sách theo tác giả
-    public List<BookEntity> findBooksByAuthor(String authorName) {
-        return bookService.findBooksByAuthor(authorName);
+    public List<BookEntity> getBooksByAuthor(String authorName) {
+        return bookService.getBooksByAuthor(authorName);
     }
 
     // Gọi dịch vụ để tìm sách theo thể loại
-    public List<BookEntity> findBooksByGenre(String genre) {
-        return bookService.findBooksByGenre(genre);
+    public List<BookEntity> getBooksByGenre(String genre) {
+        return bookService.getBooksByGenre(genre);
     }
 
     // Gọi dịch vụ để tìm sách theo nhà xuất bản
-    public List<BookEntity> findBooksByYPublisher(String publisherName) {
-        return bookService.findBooksByPublisher(publisherName);
+    public List<BookEntity> getBooksByYPublisher(String publisherName) {
+        return bookService.getBooksByPublisher(publisherName);
     }
 
     // Gọi dịch vụ để lấy danh sách tất cả sách

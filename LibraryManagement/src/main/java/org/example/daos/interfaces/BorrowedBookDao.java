@@ -68,7 +68,7 @@ public interface BorrowedBookDao {
      * @return số lượng sách đã mượn.
      * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
      */
-    int getBorrowedBooksCountByUser(String userName) throws SQLException;
+    int findBorrowedBooksCountByUser(String userName) throws SQLException;
 
     /**
      * Lấy danh sách tất cả các sách mà người dùng đã mượn.

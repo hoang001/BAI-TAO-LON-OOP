@@ -48,7 +48,7 @@ public class ReadBookDAOImpl implements ReadBookDao {
      * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     @Override
-    public List<ReadBookEntity> getReadBooks(String userName) throws SQLException {
+    public List<ReadBookEntity> findReadBooks(String userName) throws SQLException {
         String query = "SELECT rb.readId, rb.userName, b.bookId, b.isbn, b.title, b.authorId, b.publisherId, b.publicationYear, b.categoryId, b.bookCoverDirectory " +
                 "FROM ReadBooks rb " +
                 "JOIN Books b ON rb.bookId = b.bookId " +
@@ -118,14 +118,14 @@ public class ReadBookDAOImpl implements ReadBookDao {
     }
 
     /**
-     * Lấy số lượng sách đã đọc theo tên người dùng.
+     * Tìm số lượng sách đã đọc theo tên người dùng.
      *
      * @param userName Tên người dùng.
      * @return Số lượng sách đã đọc.
      * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     @Override
-    public int getReadBooksCountByUser(String userName) throws SQLException {
+    public int findReadBooksCountByUser(String userName) throws SQLException {
         String query = "SELECT COUNT(DISTINCT bookId) FROM ReadBooks WHERE userName = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, userName);

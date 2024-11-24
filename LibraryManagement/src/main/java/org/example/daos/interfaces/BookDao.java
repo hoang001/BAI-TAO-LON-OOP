@@ -55,6 +55,8 @@ public interface BookDao {
      */
     boolean updateBookAvailability(int bookId, boolean available) throws SQLException;
 
+    boolean updateBookQuantity(String isbn, int quantity) throws SQLException;
+
     /**
      * Tìm sách theo ISBN.
      *
@@ -62,7 +64,7 @@ public interface BookDao {
      * @return danh sách các cuốn sách có ISBN trùng khớp.
      * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
      */
-    List<BookEntity> findBookByIsbn(String isbn) throws SQLException;
+    BookEntity findBookByIsbn(String isbn) throws SQLException;
 
     /**
      * Tìm sách theo tiêu đề.
@@ -92,15 +94,6 @@ public interface BookDao {
     List<BookEntity> findBooksByGenre(String genre) throws SQLException;
 
     /**
-     * Tìm sách theo năm xuất bản.
-     *
-     * @param year năm xuất bản của cuốn sách.
-     * @return danh sách các cuốn sách có năm xuất bản trùng khớp.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
-     */
-    List<BookEntity> findBooksByYear(int year) throws SQLException;
-
-    /**
      * Tìm sách theo tên nhà xuất bản.
      *
      * @param publisherName tên nhà xuất bản của cuốn sách.
@@ -115,16 +108,16 @@ public interface BookDao {
      * @return danh sách tất cả các cuốn sách.
      * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
      */
-    List<BookEntity> getAllBooks() throws SQLException;
+    List<BookEntity> findAllBooks() throws SQLException;
 
-    /**
-     * Đếm số lượng sách có sẵn (đang ở trạng thái true) theo ISBN.
-     *
-     * @param isbn ISBN của cuốn sách.
-     * @return số lượng sách có sẵn.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
-     */
-    int countAvailableBooksByIsbn(String isbn) throws SQLException;
+    // /**
+    //  * Đếm số lượng sách có sẵn (đang ở trạng thái true) theo ISBN.
+    //  *
+    //  * @param isbn ISBN của cuốn sách.
+    //  * @return số lượng sách có sẵn.
+    //  * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+    //  */
+    // int countAvailableBooksByIsbn(String isbn) throws SQLException;
 
     /**
      * Tìm sách theo ID.
@@ -134,4 +127,6 @@ public interface BookDao {
      * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
      */
     BookEntity findBookById(int bookId) throws SQLException;
+
+    boolean isBookInDatabase(String isbn) throws SQLException;
 }

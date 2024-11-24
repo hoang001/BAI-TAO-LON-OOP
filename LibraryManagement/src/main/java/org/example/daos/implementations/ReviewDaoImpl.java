@@ -2,6 +2,7 @@ package org.example.daos.implementations;
 
 import org.example.daos.interfaces.ReviewDao;
 import org.example.models.ReviewEntity;
+import org.example.utils.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -18,8 +19,8 @@ public class ReviewDaoImpl implements ReviewDao {
      *
      * @param connection đối tượng Connection để kết nối cơ sở dữ liệu.
      */
-    public ReviewDaoImpl(Connection connection) {
-        this.connection = connection;
+    public ReviewDaoImpl() {
+        this.connection = DatabaseConnection.getConnection();
     }
 
     /**
@@ -34,7 +35,7 @@ public class ReviewDaoImpl implements ReviewDao {
      */
     @Override
     public boolean addReview(String userName, int bookId, int rating, String comment) throws SQLException {
-        String query = "INSERT INTO Reviews (user_id, book_id, rating, comment, created_at) VALUES (?, ?, ?, ?, NOW())";
+        String query = "INSERT INTO Reviews (userId, bookId, rating, comment) VALUES (?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, userName);
             preparedStatement.setInt(2, bookId);
@@ -52,17 +53,17 @@ public class ReviewDaoImpl implements ReviewDao {
      * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     @Override
-    public List<ReviewEntity> getReviewsByBookId(int bookId) throws SQLException {
+    public List<ReviewEntity> findReviewsByBookId(int bookId) throws SQLException {
         List<ReviewEntity> reviewEntities = new ArrayList<>();
-        String query = "SELECT * FROM Reviews WHERE book_id = ?";
+        String query = "SELECT * FROM Reviews WHERE bookId = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, bookId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     ReviewEntity reviewEntity = new ReviewEntity();
-                    reviewEntity.setId(resultSet.getInt("review_id"));
+                    reviewEntity.setId(resultSet.getInt("reviewId"));
                     reviewEntity.setUserName(resultSet.getString("userName"));
-                    reviewEntity.setBookId(resultSet.getInt("book_id"));
+                    reviewEntity.setBookId(resultSet.getInt("bookId"));
                     reviewEntity.setRating(resultSet.getInt("rating"));
                     reviewEntity.setComment(resultSet.getString("comment"));
                     reviewEntities.add(reviewEntity);
@@ -80,17 +81,17 @@ public class ReviewDaoImpl implements ReviewDao {
      * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     @Override
-    public List<ReviewEntity> getReviewsByUserName(String userName) throws SQLException {
+    public List<ReviewEntity> findReviewsByUserName(String userName) throws SQLException {
         List<ReviewEntity> reviewEntities = new ArrayList<>();
-        String query = "SELECT * FROM Reviews WHERE user_id = ?";
+        String query = "SELECT * FROM Reviews WHERE userId = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, userName);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     ReviewEntity reviewEntity = new ReviewEntity();
-                    reviewEntity.setId(resultSet.getInt("review_id"));
+                    reviewEntity.setId(resultSet.getInt("reviewId"));
                     reviewEntity.setUserName(resultSet.getString("userName"));
-                    reviewEntity.setBookId(resultSet.getInt("book_id"));
+                    reviewEntity.setBookId(resultSet.getInt("bookId"));
                     reviewEntity.setRating(resultSet.getInt("rating"));
                     reviewEntity.setComment(resultSet.getString("comment"));
                     reviewEntities.add(reviewEntity);
@@ -111,7 +112,7 @@ public class ReviewDaoImpl implements ReviewDao {
      */
     @Override
     public boolean updateReview(int reviewId, int rating, String comment) throws SQLException {
-        String query = "UPDATE Reviews SET rating = ?, comment = ? WHERE review_id = ?";
+        String query = "UPDATE Reviews SET rating = ?, comment = ? WHERE reviewId = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, rating);
             preparedStatement.setString(2, comment);
@@ -129,7 +130,7 @@ public class ReviewDaoImpl implements ReviewDao {
      */
     @Override
     public boolean deleteReview(int reviewId) throws SQLException {
-        String query = "DELETE FROM Reviews WHERE review_id = ?";
+        String query = "DELETE FROM Reviews WHERE reviewId = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, reviewId);
             return preparedStatement.executeUpdate() > 0;

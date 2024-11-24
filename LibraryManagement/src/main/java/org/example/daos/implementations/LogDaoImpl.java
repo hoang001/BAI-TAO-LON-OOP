@@ -2,6 +2,7 @@ package org.example.daos.implementations;
 
 import org.example.daos.interfaces.LogDao;
 import org.example.models.LogEntity;
+import org.example.utils.DatabaseConnection;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -19,8 +20,8 @@ public class LogDaoImpl implements LogDao {
      *
      * @param connection đối tượng Connection để kết nối cơ sở dữ liệu.
      */
-    public LogDaoImpl(Connection connection) {
-        this.connection = connection;
+    public LogDaoImpl() {
+        this.connection = DatabaseConnection.getConnection();
     }
 
     /**
@@ -32,7 +33,7 @@ public class LogDaoImpl implements LogDao {
      */
     @Override
     public boolean addLog(LogEntity logEntity) throws SQLException {
-        String query = "INSERT INTO logs (time_stamp, user_name, action_details) VALUES (?, ?, ?)";
+        String query = "INSERT INTO logs (timeStamp, userName, actionDetails) VALUES (?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setTimestamp(1, Timestamp.valueOf(logEntity.getTimeStamp()));
             statement.setString(2, logEntity.getUserName());
@@ -49,15 +50,15 @@ public class LogDaoImpl implements LogDao {
      * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     @Override
-    public List<LogEntity> getAllLogs() throws SQLException {
+    public List<LogEntity> findAllLogs() throws SQLException {
         List<LogEntity> logs = new ArrayList<>();
         String query = "SELECT * FROM logs";
         try (Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
             while (rs.next()) {
                 LogEntity logEntity = new LogEntity(
-                        rs.getTimestamp("time_stamp").toLocalDateTime(),
-                        rs.getString("user_name"),
-                        rs.getString("action_details")
+                        rs.getTimestamp("timeStamp").toLocalDateTime(),
+                        rs.getString("userName"),
+                        rs.getString("actionDetails")
                 );
                 logs.add(logEntity);
             }
@@ -73,16 +74,16 @@ public class LogDaoImpl implements LogDao {
      * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     @Override
-    public LogEntity getLogById(int logId) throws SQLException {
-        String query = "SELECT * FROM logs WHERE log_id = ?";
+    public LogEntity findLogById(int logId) throws SQLException {
+        String query = "SELECT * FROM logs WHERE logId = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, logId);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
                     return new LogEntity(
-                            rs.getTimestamp("time_stamp").toLocalDateTime(),
-                            rs.getString("user_name"),
-                            rs.getString("action_details")
+                            rs.getTimestamp("timeStamp").toLocalDateTime(),
+                            rs.getString("userName"),
+                            rs.getString("actionDetails")
                     );
                 }
                 return null; // Nếu không tìm thấy log
@@ -98,17 +99,17 @@ public class LogDaoImpl implements LogDao {
      * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     @Override
-    public List<LogEntity> getLogsByUserName(String userName) throws SQLException {
+    public List<LogEntity> findLogsByUserName(String userName) throws SQLException {
         List<LogEntity> logs = new ArrayList<>();
-        String query = "SELECT * FROM logs WHERE user_name = ?";
+        String query = "SELECT * FROM logs WHERE userName = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, userName);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     LogEntity logEntity = new LogEntity(
-                            rs.getTimestamp("time_stamp").toLocalDateTime(),
-                            rs.getString("user_name"),
-                            rs.getString("action_details")
+                            rs.getTimestamp("timeStamp").toLocalDateTime(),
+                            rs.getString("userName"),
+                            rs.getString("actionDetails")
                     );
                     logs.add(logEntity);
                 }
@@ -126,18 +127,18 @@ public class LogDaoImpl implements LogDao {
      * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     @Override
-    public List<LogEntity> getLogsByTimeRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
+    public List<LogEntity> findLogsByTimeRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
         List<LogEntity> logs = new ArrayList<>();
-        String query = "SELECT * FROM logs WHERE time_stamp BETWEEN ? AND ?";
+        String query = "SELECT * FROM logs WHERE timeStamp BETWEEN ? AND ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setTimestamp(1, Timestamp.valueOf(startDate));
             statement.setTimestamp(2, Timestamp.valueOf(endDate));
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     LogEntity logEntity = new LogEntity(
-                            rs.getTimestamp("time_stamp").toLocalDateTime(),
-                            rs.getString("user_name"),
-                            rs.getString("action_details")
+                            rs.getTimestamp("timeStamp").toLocalDateTime(),
+                            rs.getString("userName"),
+                            rs.getString("actionDetails")
                     );
                     logs.add(logEntity);
                 }
