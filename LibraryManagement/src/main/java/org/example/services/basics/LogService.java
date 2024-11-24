@@ -1,5 +1,6 @@
 package org.example.services.basics;
 
+import org.example.daos.implementations.LogDaoImpl;
 import org.example.daos.interfaces.LogDao;
 import org.example.models.LogEntity;
 import org.example.models.UserEntity.Roles;
@@ -24,15 +25,9 @@ public class LogService {
     // ExecutorService để quản lý các luồng xử lý đồng thời
     private final ExecutorService executorService;
 
-    /**
-     * Khởi tạo lớp LogService với các phụ thuộc cần thiết.
-     *
-     * @param logDao      Đối tượng LogDao để thao tác với cơ sở dữ liệu.
-     * @param userService Đối tượng UserService để xác thực người dùng.
-     */
-    public LogService(LogDao logDao, UserService userService) {
-        this.logDao = logDao;
-        this.userService = userService;
+    public LogService() {
+        this.logDao = new LogDaoImpl();
+        this.userService = new UserService();
         this.executorService = Executors.newFixedThreadPool(4); // Sử dụng thread pool cố định với 4 luồng
     }
 
@@ -84,7 +79,7 @@ public class LogService {
             // Truy vấn danh sách log bằng luồng riêng
             Future<List<LogEntity>> futureLogs = executorService.submit(() -> {
                 try {
-                    return logDao.getAllLogs();
+                    return logDao.findAllLogs();
                 } catch (SQLException e) {
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy tất cả log: " + e.getMessage());
                     return null;
@@ -118,7 +113,7 @@ public class LogService {
             // Truy vấn log theo ID bằng luồng riêng
             Future<LogEntity> futureLog = executorService.submit(() -> {
                 try {
-                    return logDao.getLogById(logId);
+                    return logDao.findLogById(logId);
                 } catch (SQLException e) {
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy log theo ID: " + e.getMessage());
                     return null;
@@ -152,7 +147,7 @@ public class LogService {
             // Truy vấn log theo tên người dùng bằng luồng riêng
             Future<List<LogEntity>> futureLogs = executorService.submit(() -> {
                 try {
-                    return logDao.getLogsByUserName(userName);
+                    return logDao.findLogsByUserName(userName);
                 } catch (SQLException e) {
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy log theo userName: " + e.getMessage());
                     return null;
@@ -187,7 +182,7 @@ public class LogService {
             // Truy vấn log theo khoảng thời gian bằng luồng riêng
             Future<List<LogEntity>> futureLogs = executorService.submit(() -> {
                 try {
-                    return logDao.getLogsByTimeRange(startDate, endDate);
+                    return logDao.findLogsByTimeRange(startDate, endDate);
                 } catch (SQLException e) {
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy log theo thời gian: " + e.getMessage());
                     return null;

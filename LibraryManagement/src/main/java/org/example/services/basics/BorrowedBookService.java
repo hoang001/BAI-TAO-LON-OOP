@@ -1,6 +1,9 @@
 package org.example.services.basics;
 
+import org.example.daos.implementations.BorrowedBookDaoImpl;
 import org.example.daos.interfaces.BorrowedBookDao;
+import org.example.daos.implementations.BookDaoImpl;
+import org.example.daos.interfaces.BookDao;
 import org.example.models.BorrowedBookEntity;
 import org.example.models.BookEntity;
 import org.example.models.UserEntity;
@@ -12,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- * Lớp BorrowedBookService chịu trách nhiệm quản lý các thao tác liên quan đến sách đã mượn,
+ * Lớp BorrowedbookDao chịu trách nhiệm quản lý các thao tác liên quan đến sách đã mượn,
  * bao gồm mượn sách, trả sách, tìm sách chưa trả, lấy danh sách sách đã mượn theo khoảng thời gian,
  * và các thao tác khác liên quan đến sách mượn của người dùng.
  */
@@ -25,7 +28,7 @@ public class BorrowedBookService {
     private final UserService userService;
 
     // Dịch vụ quản lý sách, được sử dụng để kiểm tra tình trạng sách
-    private final BookService bookService;
+    private final BookDao bookDao;
 
     // Dịch vụ ghi log, lưu lại các hoạt động liên quan đến sách đã mượn
     private final LogService logService;
@@ -33,20 +36,11 @@ public class BorrowedBookService {
     // ExecutorService để quản lý các luồng xử lý đồng thời
     private final ExecutorService executorService;
 
-    /**
-     * Khởi tạo lớp BorrowedBookService với các phụ thuộc cần thiết.
-     *
-     * @param borrowedBookDao Đối tượng BorrowedBookDao để thao tác với cơ sở dữ liệu.
-     * @param userService     Đối tượng UserService để xác thực người dùng.
-     * @param bookService     Đối tượng BookService để kiểm tra tình trạng sách.
-     * @param logService      Đối tượng LogService để ghi nhật ký hoạt động.
-     */
-    public BorrowedBookService(BorrowedBookDao borrowedBookDao, UserService userService, 
-                               BookService bookService, LogService logService) {
-        this.borrowedBookDao = borrowedBookDao;
-        this.userService = userService;
-        this.bookService = bookService;
-        this.logService = logService;
+    public BorrowedBookService() {
+        this.borrowedBookDao = new BorrowedBookDaoImpl();
+        this.userService = new UserService();
+        this.bookDao = new BookDaoImpl();
+        this.logService = new LogService();
         this.executorService = Executors.newFixedThreadPool(4); // Tạo thread pool với 4 luồng
     }
 
@@ -64,24 +58,26 @@ public class BorrowedBookService {
             if (currentUser == null) {
                 throw new IllegalStateException("Bạn cần đăng nhập trước khi mượn sách.");
             }
-
+    
             // Kiểm tra xem sách còn bản sao không
-            Future<BookEntity> futureBook = executorService.submit(() -> bookService.findBookEntityById(bookId));
+            Future<BookEntity> futureBook = executorService.submit(() -> bookDao.findBookById(bookId));
             BookEntity book = futureBook.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
-
-            if (book == null || bookService.countAvailableBooksByISBN(book.getIsbn()) == 0) {
+    
+            if (book == null || !book.isAvailable() || book.getQuantity() == 0) {
                 throw new IllegalStateException("Không có sách này để mượn.");
             }
-
+    
             // Ghi nhận mượn sách
             Future<Boolean> futureBorrow = executorService.submit(() -> borrowedBookDao.borrowBook(bookId, currentUser.getUserName(), borrowDate));
             boolean result = futureBorrow.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
-
+    
             if (result) {
-                // Cập nhật trạng thái sách
-                Future<Boolean> futureUpdate = executorService.submit(() -> bookService.updateBookAvailability(bookId, false));
-                if (!futureUpdate.get(5, TimeUnit.SECONDS)) {
-                    throw new IllegalStateException("Không thể cập nhật trạng thái sách.");
+                // Cập nhật trạng thái sách nếu chỉ còn 1 quyển
+                if (book.getQuantity() == 1) {
+                    Future<Boolean> futureUpdate = executorService.submit(() -> bookDao.updateBookAvailability(bookId, false));
+                    if (!futureUpdate.get(5, TimeUnit.SECONDS)) {
+                        throw new IllegalStateException("Không thể cập nhật trạng thái sách.");
+                    }
                 }
                 logService.addLog(new LogEntity(LocalDateTime.now(), currentUser.getUserName(), "Mượn sách ID: " + bookId + " thành công"));
             } else {
@@ -95,7 +91,7 @@ public class BorrowedBookService {
             System.out.println("Lỗi: " + e.getMessage());
             return false;
         }
-    }
+    }    
 
     /**
      * Trả một cuốn sách.
@@ -111,14 +107,14 @@ public class BorrowedBookService {
             if (currentUser == null) {
                 throw new IllegalStateException("Bạn cần đăng nhập trước khi trả sách.");
             }
-
+    
             // Ghi nhận trả sách
             Future<Boolean> futureReturn = executorService.submit(() -> borrowedBookDao.returnBook(bookId, currentUser.getUserName()));
             boolean result = futureReturn.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
-
+    
             if (result) {
-                // Cập nhật trạng thái sách
-                Future<Boolean> futureUpdate = executorService.submit(() -> bookService.updateBookAvailability(bookId, true));
+                // Cập nhật trạng thái sách luôn là available
+                Future<Boolean> futureUpdate = executorService.submit(() -> bookDao.updateBookAvailability(bookId, true));
                 if (!futureUpdate.get(5, TimeUnit.SECONDS)) {
                     throw new IllegalStateException("Không thể cập nhật trạng thái sách.");
                 }
@@ -135,6 +131,7 @@ public class BorrowedBookService {
             return false;
         }
     }
+    
 
     /**
      * Lấy danh sách các sách chưa trả của người dùng.
@@ -202,7 +199,7 @@ public class BorrowedBookService {
             }
 
             // Lấy số lượng sách đã mượn
-            Future<Integer> futureCount = executorService.submit(() -> borrowedBookDao.getBorrowedBooksCountByUser(currentUser.getUserName()));
+            Future<Integer> futureCount = executorService.submit(() -> borrowedBookDao.findBorrowedBooksCountByUser(currentUser.getUserName()));
             return futureCount.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
             logService.addLog(new LogEntity(LocalDateTime.now(), 

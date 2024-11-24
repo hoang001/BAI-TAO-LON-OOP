@@ -1,5 +1,6 @@
 package org.example.services.basics;
 
+import org.example.daos.implementations.ReviewDaoImpl;
 import org.example.daos.interfaces.ReviewDao;
 import org.example.models.ReviewEntity;
 
@@ -19,15 +20,10 @@ public class ReviewService {
     // Dịch vụ quản lý người dùng, được sử dụng để xác thực người dùng hiện tại
     private final UserService userService;
 
-    /**
-     * Khởi tạo lớp ReviewService.
-     * 
-     * @param reviewDao Đối tượng ReviewDao để thao tác với cơ sở dữ liệu.
-     * @param userService Đối tượng UserService để quản lý thông tin người dùng.
-     */
-    public ReviewService(ReviewDao reviewDao, UserService userService) {
-        this.reviewDao = reviewDao;
-        this.userService = userService;
+
+    public ReviewService() {
+        this.reviewDao = new ReviewDaoImpl();
+        this.userService = new UserService();
     }
 
     /**
@@ -81,7 +77,7 @@ public class ReviewService {
             }
 
             // Truy vấn danh sách nhận xét từ cơ sở dữ liệu
-            return reviewDao.getReviewsByBookId(bookId);
+            return reviewDao.findReviewsByBookId(bookId);
         } catch (IllegalArgumentException e) {
             System.out.println("Lỗi: " + e.getMessage());
             return Collections.emptyList();
@@ -104,7 +100,7 @@ public class ReviewService {
             }
 
             // Truy vấn danh sách nhận xét từ cơ sở dữ liệu
-            return reviewDao.getReviewsByUserName(userService.getLoginUser().getUserName());
+            return reviewDao.findReviewsByUserName(userService.getLoginUser().getUserName());
         } catch (IllegalStateException e) {
             System.out.println("Lỗi: " + e.getMessage());
             return Collections.emptyList();

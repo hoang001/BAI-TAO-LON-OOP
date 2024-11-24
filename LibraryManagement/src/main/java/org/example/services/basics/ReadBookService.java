@@ -1,6 +1,9 @@
 package org.example.services.basics;
 
+import org.example.daos.implementations.ReadBookDAOImpl;
 import org.example.daos.interfaces.ReadBookDao;
+import org.example.daos.implementations.LogDaoImpl;
+import org.example.daos.interfaces.LogDao;
 import org.example.models.ReadBookEntity;
 import org.example.models.LogEntity;
 
@@ -25,22 +28,15 @@ public class ReadBookService {
     private final UserService userService;
 
     // Dịch vụ ghi log, lưu lại các hoạt động liên quan đến sách đã đọc
-    private final LogService logService;
+    private final LogDao logDao;
 
     // ExecutorService để quản lý các luồng xử lý đồng thời
     private final ExecutorService executorService;
 
-    /**
-     * Khởi tạo lớp ReadBookService với các phụ thuộc cần thiết.
-     * 
-     * @param readBookDao Đối tượng ReadBookDao để thao tác với cơ sở dữ liệu.
-     * @param userService Đối tượng UserService để xác thực người dùng.
-     * @param logService Đối tượng LogService để ghi nhật ký hoạt động.
-     */
-    public ReadBookService(ReadBookDao readBookDao, UserService userService, LogService logService) {
-        this.readBookDao = readBookDao;
-        this.userService = userService;
-        this.logService = logService;
+    public ReadBookService() {
+        this.readBookDao = new ReadBookDAOImpl();
+        this.userService = new UserService();
+        this.logDao = new LogDaoImpl();
         this.executorService = Executors.newFixedThreadPool(4); // Sử dụng thread pool cố định với 4 luồng
     }
 
@@ -81,12 +77,12 @@ public class ReadBookService {
 
             // Ghi log nếu thành công
             if (result) {
-                logService.addLog(new LogEntity(LocalDateTime.now(), userName, "Đánh dấu sách " + bookId + " đã đọc"));
+                // logService.addLog(new LogEntity(LocalDateTime.now(), userName, "Đánh dấu sách " + bookId + " đã đọc"));
             }
             return result;
         } catch (IllegalArgumentException | InterruptedException | ExecutionException e) {
             System.out.println("Lỗi: " + e.getMessage());
-            logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
+            // logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
             return false;
         }
     }
@@ -112,7 +108,7 @@ public class ReadBookService {
             // Truy vấn danh sách sách đã đọc bằng luồng riêng
             Future<List<ReadBookEntity>> future = executorService.submit(() -> {
                 try {
-                    return readBookDao.getReadBooks(userName);
+                    return readBookDao.findReadBooks(userName);
                 } catch (SQLException e) {
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy danh sách sách đã đọc: " + e.getMessage());
                     return null;
@@ -121,7 +117,7 @@ public class ReadBookService {
             return future.get(); // Chờ kết quả từ luồng
         } catch (IllegalArgumentException | InterruptedException | ExecutionException e) {
             System.out.println("Lỗi: " + e.getMessage());
-            logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
+            // logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
             return null;
         }
     }
@@ -162,11 +158,11 @@ public class ReadBookService {
             boolean isRead = future.get(); // Chờ kết quả từ luồng
 
             // Ghi log kết quả kiểm tra
-            logService.addLog(new LogEntity(LocalDateTime.now(), userName, "Kiểm tra sách " + bookId + " đã đọc: " + isRead));
+            // logService.addLog(new LogEntity(LocalDateTime.now(), userName, "Kiểm tra sách " + bookId + " đã đọc: " + isRead));
             return isRead;
         } catch (IllegalArgumentException | InterruptedException | ExecutionException e) {
             System.out.println("Lỗi: " + e.getMessage());
-            logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
+            // logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
             return false;
         }
     }
@@ -208,12 +204,12 @@ public class ReadBookService {
 
             // Ghi log nếu thành công
             if (result) {
-                logService.addLog(new LogEntity(LocalDateTime.now(), userName, "Xóa đánh dấu sách " + bookId + " đã đọc"));
+                // logService.addLog(new LogEntity(LocalDateTime.now(), userName, "Xóa đánh dấu sách " + bookId + " đã đọc"));
             }
             return result;
         } catch (IllegalArgumentException | InterruptedException | ExecutionException e) {
             System.out.println("Lỗi: " + e.getMessage());
-            logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
+            // logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
             return false;
         }
     }

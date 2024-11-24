@@ -10,7 +10,7 @@ public class DatabaseConnection {
     // Tên người dùng cơ sở dữ liệu
     private static final String USER = "root";
     // Mật khẩu của người dùng cơ sở dữ liệu
-    private static final String PASSWORD = "S01T004651";
+    private static final String PASSWORD = "password";
 
     /**
      * Lấy kết nối cơ sở dữ liệu.

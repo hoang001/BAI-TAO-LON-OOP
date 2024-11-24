@@ -68,7 +68,7 @@ public class SearchService {
 
         // Thêm các cuốn sách đã đọc vào danh sách
         for (ReadBookEntity readBook : readBooks) {
-            BookEntity book = bookService.findBookEntityById(readBook.getBookId());
+            BookEntity book = bookService.getBookById(readBook.getBookId());
             if (book != null) {
                 allBooks.add(book); // Nếu tìm thấy sách, thêm vào danh sách
             }
@@ -76,7 +76,7 @@ public class SearchService {
 
         // Thêm các cuốn sách đã mượn vào danh sách
         for (BorrowedBookEntity borrowedBook : borrowedBooks) {
-            BookEntity book = bookService.findBookEntityById(borrowedBook.getBookId());
+            BookEntity book = bookService.getBookById(borrowedBook.getBookId());
             if (book != null) {
                 allBooks.add(book); // Nếu tìm thấy sách, thêm vào danh sách
             }
@@ -155,14 +155,14 @@ public class SearchService {
         // Kết hợp tất cả các sách đã đọc và đã mượn vào một danh sách chung
         List<BookEntity> allBooks = new ArrayList<>();
         for (ReadBookEntity readBook : readBooks) {
-            BookEntity book = bookService.findBookEntityById(readBook.getBookId());
+            BookEntity book = bookService.getBookById(readBook.getBookId());
             if (book != null) {
                 allBooks.add(book); // Thêm sách đã đọc vào danh sách
             }
         }
 
         for (BorrowedBookEntity borrowedBook : borrowedBooks) {
-            BookEntity book = bookService.findBookEntityById(borrowedBook.getBookId());
+            BookEntity book = bookService.getBookById(borrowedBook.getBookId());
             if (book != null) {
                 allBooks.add(book); // Thêm sách đã mượn vào danh sách
             }
@@ -240,14 +240,14 @@ public class SearchService {
         // Kết hợp tất cả các sách đã đọc và đã mượn vào một danh sách chung
         List<BookEntity> allBooks = new ArrayList<>();
         for (ReadBookEntity readBook : readBooks) {
-            BookEntity book = bookService.findBookEntityById(readBook.getBookId());
+            BookEntity book = bookService.getBookById(readBook.getBookId());
             if (book != null) {
                 allBooks.add(book); // Thêm sách đã đọc vào danh sách
             }
         }
 
         for (BorrowedBookEntity borrowedBook : borrowedBooks) {
-            BookEntity book = bookService.findBookEntityById(borrowedBook.getBookId());
+            BookEntity book = bookService.getBookById(borrowedBook.getBookId());
             if (book != null) {
                 allBooks.add(book); // Thêm sách đã mượn vào danh sách
             }
