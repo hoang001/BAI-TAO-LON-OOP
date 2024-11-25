@@ -4,9 +4,10 @@ import org.example.daos.implementations.BorrowedBookDaoImpl;
 import org.example.daos.interfaces.BorrowedBookDao;
 import org.example.daos.implementations.BookDaoImpl;
 import org.example.daos.interfaces.BookDao;
+import org.example.daos.implementations.LogDaoImpl;
+import org.example.daos.interfaces.LogDao;
 import org.example.models.BorrowedBookEntity;
 import org.example.models.BookEntity;
-import org.example.models.UserEntity;
 import org.example.models.LogEntity;
 
 import java.sql.SQLException;
@@ -31,7 +32,7 @@ public class BorrowedBookService {
     private final BookDao bookDao;
 
     // Dịch vụ ghi log, lưu lại các hoạt động liên quan đến sách đã mượn
-    private final LogService logService;
+    private final LogDao logDao;
 
     // ExecutorService để quản lý các luồng xử lý đồng thời
     private final ExecutorService executorService;
@@ -40,12 +41,12 @@ public class BorrowedBookService {
         this.borrowedBookDao = new BorrowedBookDaoImpl();
         this.userService = new UserService();
         this.bookDao = new BookDaoImpl();
-        this.logService = new LogService();
+        this.logDao = new LogDaoImpl();
         this.executorService = Executors.newFixedThreadPool(4); // Tạo thread pool với 4 luồng
     }
 
     /**
-     * Mượn một cuốn sách.
+     * Mượn một cuốn sách và cập nhật trạng thái của sách.
      *
      * @param bookId     ID của sách cần mượn.
      * @param borrowDate Ngày mượn sách.
@@ -54,9 +55,8 @@ public class BorrowedBookService {
     public boolean borrowBook(int bookId, LocalDateTime borrowDate) {
         try {
             // Kiểm tra người dùng đã đăng nhập
-            UserEntity currentUser = userService.getLoginUser();
-            if (currentUser == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập trước khi mượn sách.");
+            if (userService.getLoginUser() == null) {
+                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi mượn sách");
             }
     
             // Kiểm tra xem sách còn bản sao không
@@ -68,7 +68,7 @@ public class BorrowedBookService {
             }
     
             // Ghi nhận mượn sách
-            Future<Boolean> futureBorrow = executorService.submit(() -> borrowedBookDao.borrowBook(bookId, currentUser.getUserName(), borrowDate));
+            Future<Boolean> futureBorrow = executorService.submit(() -> borrowedBookDao.borrowBook(bookId, userService.getLoginUser().getUserName(), borrowDate));
             boolean result = futureBorrow.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
     
             if (result) {
@@ -79,22 +79,27 @@ public class BorrowedBookService {
                         throw new IllegalStateException("Không thể cập nhật trạng thái sách.");
                     }
                 }
-                logService.addLog(new LogEntity(LocalDateTime.now(), currentUser.getUserName(), "Mượn sách ID: " + bookId + " thành công"));
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Mượn sách ID: " + bookId + " thành công"));
             } else {
                 throw new IllegalStateException("Không thể ghi nhận mượn sách.");
             }
             return result;
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
-            logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
-                "Lỗi khi mượn sách: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
+            return false;
+        } catch (SQLException logException) {
+            System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             return false;
         }
     }    
 
     /**
-     * Trả một cuốn sách.
+     * Trả một cuốn sách và cập nhật trạng thái của sách.
      *
      * @param bookId     ID của sách cần trả.
      * @param returnDate Ngày trả sách.
@@ -103,13 +108,12 @@ public class BorrowedBookService {
     public boolean returnBook(int bookId, LocalDateTime returnDate) {
         try {
             // Kiểm tra người dùng đã đăng nhập
-            UserEntity currentUser = userService.getLoginUser();
-            if (currentUser == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập trước khi trả sách.");
+            if (userService.getLoginUser() == null) {
+                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi mượn sách");
             }
     
             // Ghi nhận trả sách
-            Future<Boolean> futureReturn = executorService.submit(() -> borrowedBookDao.returnBook(bookId, currentUser.getUserName()));
+            Future<Boolean> futureReturn = executorService.submit(() -> borrowedBookDao.returnBook(bookId, userService.getLoginUser().getUserName()));
             boolean result = futureReturn.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
     
             if (result) {
@@ -118,19 +122,23 @@ public class BorrowedBookService {
                 if (!futureUpdate.get(5, TimeUnit.SECONDS)) {
                     throw new IllegalStateException("Không thể cập nhật trạng thái sách.");
                 }
-                logService.addLog(new LogEntity(LocalDateTime.now(), currentUser.getUserName(), "Trả sách ID: " + bookId + " thành công"));
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Trả sách ID: " + bookId + " thành công"));
             } else {
                 throw new IllegalStateException("Không thể ghi nhận trả sách.");
             }
             return result;
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
-            logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
-                "Lỗi khi trả sách: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
-            return false;
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
+        } catch (SQLException logException) {
+            System.out.println("Lỗi khi ghi log: " + logException.getMessage());
         }
-    }
+        return false;
+    }    
     
 
     /**
@@ -138,25 +146,36 @@ public class BorrowedBookService {
      *
      * @return Danh sách các đối tượng BorrowedBookEntity hoặc null nếu có lỗi.
      */
-    public List<BorrowedBookEntity> findNotReturnedBooksByUser() {
+    public List<BorrowedBookEntity> getNotReturnedBooksByUser() {
         try {
             // Kiểm tra người dùng đã đăng nhập
-            UserEntity currentUser = userService.getLoginUser();
-            if (currentUser == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập trước khi xem sách chưa trả.");
+            if (userService.getLoginUser() == null) {
+                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi mượn sách");
             }
-
+    
             // Tìm danh sách sách chưa trả
-            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> borrowedBookDao.findNotReturnedBooksByUser(currentUser.getUserName()));
+            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> {
+                try {
+                    List<BorrowedBookEntity> books = borrowedBookDao.findNotReturnedBooksByUser(userService.getLoginUser().getUserName());
+                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Tìm thấy sách chưa trả thành công"));
+                    return books;
+                } catch (SQLException e) {
+                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi cơ sở dữ liệu: " + e.getMessage()));
+                    System.out.println("Lỗi cơ sở dữ liệu trong quá trình tìm sách chưa trả: " + e.getMessage());
+                    return null;
+                }
+            });
             return futureBooks.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
-            logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
-                "Lỗi khi lấy danh sách sách chưa trả: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
             return null;
         }
-    }
+    }    
 
     /**
      * Lấy danh sách các sách đã mượn trong một khoảng thời gian.
@@ -165,25 +184,37 @@ public class BorrowedBookService {
      * @param endDate   Ngày kết thúc.
      * @return Danh sách các đối tượng BorrowedBookEntity hoặc null nếu có lỗi.
      */
-    public List<BorrowedBookEntity> findBorrowedBooksByUserAndDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+    public List<BorrowedBookEntity> getBorrowedBooksByUserAndDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         try {
             // Kiểm tra người dùng đã đăng nhập
-            UserEntity currentUser = userService.getLoginUser();
-            if (currentUser == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập trước khi xem sách đã mượn.");
+            if (userService.getLoginUser() == null) {
+                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi mượn sách");
             }
-
+    
             // Tìm danh sách sách mượn trong khoảng thời gian
-            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> borrowedBookDao.findBorrowedBooksByUser(currentUser.getUserName(), startDate, endDate));
+            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> {
+                try {
+                    List<BorrowedBookEntity> books = borrowedBookDao.findBorrowedBooksByUser(userService.getLoginUser().getUserName(), startDate, endDate);
+                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Tìm thấy sách mượn trong khoảng thời gian thành công"));
+                    return books;
+                } catch (SQLException e) {
+                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi cơ sở dữ liệu: " + e.getMessage()));
+                    System.out.println("Lỗi cơ sở dữ liệu trong quá trình tìm sách mượn: " + e.getMessage());
+                    return null;
+                }
+            });
             return futureBooks.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
-            logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
-                "Lỗi khi tìm sách đã mượn: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
             return null;
         }
-    }
+    }    
+    
 
     /**
      * Lấy số lượng sách đã mượn của người dùng.
@@ -193,22 +224,33 @@ public class BorrowedBookService {
     public int getBorrowedBooksCountByUser() {
         try {
             // Kiểm tra người dùng đã đăng nhập
-            UserEntity currentUser = userService.getLoginUser();
-            if (currentUser == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập trước khi lấy số lượng sách đã mượn");
+            if (userService.getLoginUser() == null) {
+                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi mượn sách");
             }
-
+    
             // Lấy số lượng sách đã mượn
-            Future<Integer> futureCount = executorService.submit(() -> borrowedBookDao.findBorrowedBooksCountByUser(currentUser.getUserName()));
+            Future<Integer> futureCount = executorService.submit(() -> {
+                try {
+                    int count = borrowedBookDao.findBorrowedBooksCountByUser(userService.getLoginUser().getUserName());
+                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lấy số lượng sách đã mượn thành công"));
+                    return count;
+                } catch (SQLException e) {
+                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi cơ sở dữ liệu: " + e.getMessage()));
+                    System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy số lượng sách đã mượn: " + e.getMessage());
+                    return 0;
+                }
+            });
             return futureCount.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
-            logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
-                "Lỗi khi lấy số lượng sách đã mượn: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
             return 0;
         }
-    }
+    }    
 
     /**
      * Lấy tất cả các sách đã mượn của người dùng.
@@ -218,20 +260,31 @@ public class BorrowedBookService {
     public List<BorrowedBookEntity> getAllBorrowedBooksByUser() {
         try {
             // Kiểm tra người dùng đã đăng nhập
-            UserEntity currentUser = userService.getLoginUser();
-            if (currentUser == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập trước khi lấy danh sách sách đã mượn.");
+            if (userService.getLoginUser() == null) {
+                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi mượn sách");
             }
-
+    
             // Thực thi trong một luồng riêng biệt
-            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> borrowedBookDao.findAllBorrowedBooksByUser(currentUser.getUserName()));
+            Future<List<BorrowedBookEntity>> futureBooks = executorService.submit(() -> {
+                try {
+                    List<BorrowedBookEntity> books = borrowedBookDao.findAllBorrowedBooksByUser(userService.getLoginUser().getUserName());
+                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lấy danh sách sách đã mượn thành công"));
+                    return books;
+                } catch (SQLException e) {
+                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi cơ sở dữ liệu: " + e.getMessage()));
+                    System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy danh sách sách đã mượn: " + e.getMessage());
+                    return null;
+                }
+            });
             return futureBooks.get(5, TimeUnit.SECONDS); // Thêm timeout 5 giây
         } catch (InterruptedException | ExecutionException | IllegalStateException | TimeoutException e) {
-            logService.addLog(new LogEntity(LocalDateTime.now(), 
-                userService.getLoginUser() != null ? userService.getLoginUser().getUserName() : "unknown", 
-                "Lỗi khi lấy tất cả sách đã mượn: " + e.getMessage()));
             System.out.println("Lỗi: " + e.getMessage());
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
             return null;
         }
-    }
+    }    
 }

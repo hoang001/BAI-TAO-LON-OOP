@@ -52,40 +52,49 @@ public class ReadBookService {
             if (userService.getLoginUser() == null) {
                 throw new IllegalArgumentException("Bạn cần đăng nhập trước khi đánh dấu sách đã đọc");
             }
-
+    
             // Kiểm tra giá trị đầu vào
             if (bookId <= 0) {
-                throw new IllegalArgumentException("ID sách không hợp lệ");
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Thêm đánh giá thất bại: ID sách không hợp lệ"));
+                throw new IllegalArgumentException("ID sách không được để trống và phải là số dương");
             }
-
-            // Lấy tên người dùng hiện tại
-            String userName = userService.getLoginUser().getUserName();
-            if (userName == null || userName.trim().isEmpty()) {
-                throw new IllegalArgumentException("Tên người dùng không hợp lệ");
-            }
-
+    
             // Thực hiện đánh dấu sách đã đọc bằng luồng riêng
             Future<Boolean> future = executorService.submit(() -> {
                 try {
-                    return readBookDao.markAsRead(bookId, userName);
+                    return readBookDao.markAsRead(bookId, userService.getLoginUser().getUserName());
                 } catch (SQLException e) {
+                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi cơ sở dữ liệu: " + e.getMessage()));
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình đánh dấu sách đã đọc: " + e.getMessage());
                     return false;
                 }
             });
             boolean result = future.get(); // Chờ kết quả từ luồng
-
+    
             // Ghi log nếu thành công
             if (result) {
-                // logService.addLog(new LogEntity(LocalDateTime.now(), userName, "Đánh dấu sách " + bookId + " đã đọc"));
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Đánh dấu sách " + bookId + " đã đọc"));
+            } else {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Không thể đánh dấu sách " + bookId + " đã đọc"));
             }
+    
             return result;
         } catch (IllegalArgumentException | InterruptedException | ExecutionException e) {
             System.out.println("Lỗi: " + e.getMessage());
-            // logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
+            return false;
+        } catch (SQLException logException) {
+            System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             return false;
         }
     }
+    
+    
+    
 
     /**
      * Lấy danh sách sách đã đọc của người dùng hiện tại.
@@ -99,16 +108,10 @@ public class ReadBookService {
                 throw new IllegalArgumentException("Bạn cần đăng nhập trước khi lấy danh sách sách đã đọc");
             }
 
-            // Lấy tên người dùng hiện tại
-            String userName = userService.getLoginUser().getUserName();
-            if (userName == null || userName.trim().isEmpty()) {
-                throw new IllegalArgumentException("Tên người dùng không hợp lệ");
-            }
-
             // Truy vấn danh sách sách đã đọc bằng luồng riêng
             Future<List<ReadBookEntity>> future = executorService.submit(() -> {
                 try {
-                    return readBookDao.findReadBooks(userName);
+                    return readBookDao.findReadBooks(userService.getLoginUser().getUserName());
                 } catch (SQLException e) {
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy danh sách sách đã đọc: " + e.getMessage());
                     return null;
@@ -117,7 +120,11 @@ public class ReadBookService {
             return future.get(); // Chờ kết quả từ luồng
         } catch (IllegalArgumentException | InterruptedException | ExecutionException e) {
             System.out.println("Lỗi: " + e.getMessage());
-            // logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
             return null;
         }
     }
@@ -137,19 +144,14 @@ public class ReadBookService {
 
             // Kiểm tra giá trị đầu vào
             if (bookId <= 0) {
-                throw new IllegalArgumentException("ID sách không hợp lệ");
-            }
-
-            // Lấy tên người dùng hiện tại
-            String userName = userService.getLoginUser().getUserName();
-            if (userName == null || userName.trim().isEmpty()) {
-                throw new IllegalArgumentException("Tên người dùng không hợp lệ");
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Thêm đánh giá thất bại: ID sách không hợp lệ"));
+                throw new IllegalArgumentException("ID sách không được để trống và phải là số dương");
             }
 
             // Thực hiện kiểm tra sách đã đọc bằng luồng riêng
             Future<Boolean> future = executorService.submit(() -> {
                 try {
-                    return readBookDao.isBookRead(bookId, userName);
+                    return readBookDao.isBookRead(bookId, userService.getLoginUser().getUserName());
                 } catch (SQLException e) {
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình kiểm tra sách đã đọc: " + e.getMessage());
                     return false;
@@ -158,11 +160,18 @@ public class ReadBookService {
             boolean isRead = future.get(); // Chờ kết quả từ luồng
 
             // Ghi log kết quả kiểm tra
-            // logService.addLog(new LogEntity(LocalDateTime.now(), userName, "Kiểm tra sách " + bookId + " đã đọc: " + isRead));
+            logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Kiểm tra sách " + bookId + " đã đọc: " + isRead));
             return isRead;
         } catch (IllegalArgumentException | InterruptedException | ExecutionException e) {
             System.out.println("Lỗi: " + e.getMessage());
-            // logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
+            return false;
+        } catch (SQLException logException) {
+            System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             return false;
         }
     }
@@ -182,19 +191,14 @@ public class ReadBookService {
 
             // Kiểm tra giá trị đầu vào
             if (bookId <= 0) {
-                throw new IllegalArgumentException("ID sách không hợp lệ");
-            }
-
-            // Lấy tên người dùng hiện tại
-            String userName = userService.getLoginUser().getUserName();
-            if (userName == null || userName.trim().isEmpty()) {
-                throw new IllegalArgumentException("Tên người dùng không hợp lệ");
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Thêm đánh giá thất bại: ID sách không hợp lệ"));
+                throw new IllegalArgumentException("ID sách không được để trống và phải là số dương");
             }
 
             // Thực hiện xóa đánh dấu sách đã đọc bằng luồng riêng
             Future<Boolean> future = executorService.submit(() -> {
                 try {
-                    return readBookDao.unmarkAsRead(bookId, userName);
+                    return readBookDao.unmarkAsRead(bookId, userService.getLoginUser().getUserName());
                 } catch (SQLException e) {
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình xóa đánh dấu sách đã đọc: " + e.getMessage());
                     return false;
@@ -204,12 +208,19 @@ public class ReadBookService {
 
             // Ghi log nếu thành công
             if (result) {
-                // logService.addLog(new LogEntity(LocalDateTime.now(), userName, "Xóa đánh dấu sách " + bookId + " đã đọc"));
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Xóa đánh dấu sách " + bookId + " đã đọc"));
             }
             return result;
         } catch (IllegalArgumentException | InterruptedException | ExecutionException e) {
             System.out.println("Lỗi: " + e.getMessage());
-            // logService.addLog(new LogEntity(LocalDateTime.now(), "SYSTEM", "Lỗi: " + e.getMessage()));
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
+            return false;
+        }  catch (SQLException logException) {
+            System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             return false;
         }
     }

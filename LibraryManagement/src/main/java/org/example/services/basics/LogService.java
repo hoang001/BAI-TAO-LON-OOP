@@ -30,57 +30,25 @@ public class LogService {
         this.userService = new UserService();
         this.executorService = Executors.newFixedThreadPool(4); // Sử dụng thread pool cố định với 4 luồng
     }
-
+    
     /**
-     * Thêm một log mới.
-     *
-     * @param logEntity Đối tượng LogEntity chứa thông tin nhật ký cần thêm.
-     * @return True nếu thêm thành công, ngược lại False.
-     */
-    public boolean addLog(LogEntity logEntity) {
-        try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập để thêm log");
-            }
-
-            // Thực hiện thêm log bằng luồng riêng
-            Future<Boolean> future = executorService.submit(() -> {
-                try {
-                    return logDao.addLog(logEntity);
-                } catch (SQLException e) {
-                    System.out.println("Lỗi cơ sở dữ liệu trong quá trình thêm log: " + e.getMessage());
-                    return false;
-                }
-            });
-            return future.get(5, TimeUnit.SECONDS); // Chờ kết quả từ luồng, giới hạn 5 giây
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Lỗi trong quá trình thêm log: " + e.getMessage());
-            return false;
-        } catch (TimeoutException e) {
-            System.out.println("Thời gian chờ quá lâu khi thêm log: " + e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Lấy tất cả các log trong hệ thống.
-     *
-     * @return Danh sách các đối tượng LogEntity hoặc null nếu có lỗi.
+     * Lấy tất cả danh sách các log.
      */
     public List<LogEntity> getAllLogs() {
         try {
             if (userService.getLoginUser() == null) {
                 throw new IllegalStateException("Bạn cần đăng nhập để lấy tất cả các log");
             }
-            if (!userService.getLoginUser().getRole().equals(Roles.ADMIN)) {
+            if (!userService.getLoginUser().getRole().equals(Roles.ADMIN) || !userService.getLoginUser().getRole().equals(Roles.LIBRARIAN)) {
                 throw new SecurityException("Bạn không có quyền");
             }
-
+    
             // Truy vấn danh sách log bằng luồng riêng
             Future<List<LogEntity>> futureLogs = executorService.submit(() -> {
                 try {
                     return logDao.findAllLogs();
                 } catch (SQLException e) {
+                    // Xử lý lỗi cơ sở dữ liệu và ghi log
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy tất cả log: " + e.getMessage());
                     return null;
                 }
@@ -94,27 +62,27 @@ public class LogService {
             return null;
         }
     }
-
+    
     /**
-     * Lấy log theo ID.
-     *
-     * @param logId ID của log cần lấy.
-     * @return Đối tượng LogEntity nếu tìm thấy, ngược lại null.
+     * lấy thông tin log theo id.
+     * @param logId id của log cần lấy thông tin.
+     * @return trả về thông tin của log.
      */
     public LogEntity getLogById(int logId) {
         try {
             if (userService.getLoginUser() == null) {
                 throw new IllegalStateException("Bạn cần đăng nhập để lấy log theo ID");
             }
-            if (!userService.getLoginUser().getRole().equals(Roles.ADMIN)) {
+            if (!userService.getLoginUser().getRole().equals(Roles.ADMIN) || !userService.getLoginUser().getRole().equals(Roles.LIBRARIAN)) {
                 throw new SecurityException("Bạn không có quyền");
             }
-
+    
             // Truy vấn log theo ID bằng luồng riêng
             Future<LogEntity> futureLog = executorService.submit(() -> {
                 try {
                     return logDao.findLogById(logId);
                 } catch (SQLException e) {
+                    // Xử lý lỗi cơ sở dữ liệu và ghi log
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy log theo ID: " + e.getMessage());
                     return null;
                 }
@@ -128,27 +96,24 @@ public class LogService {
             return null;
         }
     }
-
+    
     /**
-     * Lấy log theo tên người dùng.
-     *
-     * @param userName Tên người dùng cần lấy log.
-     * @return Danh sách các đối tượng LogEntity hoặc null nếu có lỗi.
+     * lấy log theo userName.
+     * @param userName tên người dùng lấy log.
+     * @return trả về danh sách các log.
      */
     public List<LogEntity> getLogsByUserName(String userName) {
         try {
             if (userService.getLoginUser() == null) {
                 throw new IllegalStateException("Bạn cần đăng nhập để lấy log theo userName");
             }
-            if (!userService.getLoginUser().getRole().equals(Roles.ADMIN)) {
-                throw new SecurityException("Bạn không có quyền");
-            }
-
+    
             // Truy vấn log theo tên người dùng bằng luồng riêng
             Future<List<LogEntity>> futureLogs = executorService.submit(() -> {
                 try {
                     return logDao.findLogsByUserName(userName);
                 } catch (SQLException e) {
+                    // Xử lý lỗi cơ sở dữ liệu và ghi log
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy log theo userName: " + e.getMessage());
                     return null;
                 }
@@ -162,28 +127,25 @@ public class LogService {
             return null;
         }
     }
-
+    
     /**
-     * Lấy log theo khoảng thời gian.
-     *
-     * @param startDate Thời gian bắt đầu.
-     * @param endDate   Thời gian kết thúc.
-     * @return Danh sách các đối tượng LogEntity hoặc null nếu có lỗi.
+     * Lấy danh sách các log trong 1 khoảng thời gian.
+     * @param startDate thời gian bắt đầu.
+     * @param endDate thời gian kết thúc.
+     * @return trả về danh sách các log.
      */
     public List<LogEntity> getLogsByTimeRange(LocalDateTime startDate, LocalDateTime endDate) {
         try {
             if (userService.getLoginUser() == null) {
                 throw new IllegalStateException("Bạn cần đăng nhập để lấy log theo thời gian");
             }
-            if (!userService.getLoginUser().getRole().equals(Roles.ADMIN)) {
-                throw new SecurityException("Bạn không có quyền");
-            }
-
+    
             // Truy vấn log theo khoảng thời gian bằng luồng riêng
             Future<List<LogEntity>> futureLogs = executorService.submit(() -> {
                 try {
                     return logDao.findLogsByTimeRange(startDate, endDate);
                 } catch (SQLException e) {
+                    // Xử lý lỗi cơ sở dữ liệu và ghi log
                     System.out.println("Lỗi cơ sở dữ liệu trong quá trình lấy log theo thời gian: " + e.getMessage());
                     return null;
                 }
@@ -197,13 +159,4 @@ public class LogService {
             return null;
         }
     }
-
-    /**
-     * Tắt ExecutorService khi không còn cần thiết để giải phóng tài nguyên.
-     */
-    public void shutdownExecutor() {
-        if (!executorService.isShutdown()) {
-            executorService.shutdown();
-        }
-    }
-}
+}    

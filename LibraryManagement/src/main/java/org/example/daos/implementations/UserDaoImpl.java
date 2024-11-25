@@ -65,16 +65,15 @@ public class UserDaoImpl implements UserDao {
                 // Kiểm tra mật khẩu người dùng nhập vào có khớp với mật khẩu đã mã hóa trong cơ sở dữ liệu
                 if (BCrypt.checkpw(password, storedPasswordHash)) {
                     return new UserEntity(
-                            // resultSet.getInt("UserID"),
+                            resultSet.getInt("UserID"),
                             resultSet.getString("Username"),
                             resultSet.getString("PasswordHash"),
                             resultSet.getString("Email"),
                             resultSet.getString("FirstName"),
                             resultSet.getString("LastName"),
                             resultSet.getString("PhoneNumber"),
-                            resultSet.getString("ProfileImageDirectory")
-                            // Lấy và gán vai trò từ cơ sở dữ liệu
-                            // Roles.valueOf(resultSet.getString("Role"))
+                            resultSet.getString("ProfileImageDirectory"),
+                            Roles.valueOf(resultSet.getString("Role"))
                     );
                 }
             }
@@ -174,15 +173,15 @@ public class UserDaoImpl implements UserDao {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return new UserEntity(
-                        // resultSet.getInt("UserID"),
+                        resultSet.getInt("UserID"),
                         resultSet.getString("Username"),
                         resultSet.getString("PasswordHash"),
                         resultSet.getString("Email"),
                         resultSet.getString("FirstName"),
                         resultSet.getString("LastName"),
                         resultSet.getString("PhoneNumber"),
-                        resultSet.getString("ProfileImageDirectory")
-                        // Roles.valueOf(resultSet.getString("Role"))  // Gán vai trò từ cơ sở dữ liệu
+                        resultSet.getString("ProfileImageDirectory"),
+                        Roles.valueOf(resultSet.getString("Role"))
                     );
                 }
             }

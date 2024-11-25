@@ -2,9 +2,13 @@ package org.example.services.basics;
 
 import org.example.daos.implementations.ReviewDaoImpl;
 import org.example.daos.interfaces.ReviewDao;
+import org.example.daos.implementations.LogDaoImpl;
+import org.example.daos.interfaces.LogDao;
+import org.example.models.LogEntity;
 import org.example.models.ReviewEntity;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,10 +24,13 @@ public class ReviewService {
     // Dịch vụ quản lý người dùng, được sử dụng để xác thực người dùng hiện tại
     private final UserService userService;
 
+    private final LogDao logDao;
+
 
     public ReviewService() {
         this.reviewDao = new ReviewDaoImpl();
         this.userService = new UserService();
+        this.logDao = new LogDaoImpl();
     }
 
     /**
@@ -38,30 +45,54 @@ public class ReviewService {
         try {
             // Kiểm tra người dùng đã đăng nhập hay chưa
             if (userService.getLoginUser() == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập trước khi thêm nhận xét.");
+                throw new IllegalStateException("Bạn cần đăng nhập trước khi thêm đánh giá");
             }
-
+    
             // Kiểm tra giá trị đầu vào
             if (bookId <= 0) {
-                throw new IllegalArgumentException("ID sách không được để trống và phải là số dương.");
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Thêm đánh giá thất bại: ID sách không hợp lệ"));
+                throw new IllegalArgumentException("ID sách không được để trống và phải là số dương");
             }
             if (rating < 1 || rating > 5) {
-                throw new IllegalArgumentException("Đánh giá phải nằm trong khoảng từ 1 đến 5.");
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Thêm đánh giá thất bại: Đánh giá không hợp lệ"));
+                throw new IllegalArgumentException("Đánh giá phải nằm trong khoảng từ 1 đến 5");
             }
             if (comment == null || comment.trim().isEmpty()) {
-                throw new IllegalArgumentException("Nhận xét không được để trống.");
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Thêm đánh giá thất bại: Nhận xét không hợp lệ"));
+                throw new IllegalArgumentException("Nhận xét không được để trống");
             }
-
+    
             // Thực hiện thêm nhận xét vào cơ sở dữ liệu
-            return reviewDao.addReview(userService.getLoginUser().getUserName(), bookId, rating, comment);
+            boolean result = reviewDao.addReview(userService.getLoginUser().getUserName(), bookId, rating, comment);
+            if(result) {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Thêm đánh giá thành công"));
+            } else {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Thêm đánh giá thất bại"));
+            }
+    
+            return result;
+    
         } catch (IllegalStateException | IllegalArgumentException e) {
-            System.out.println("Lỗi: " + e.getMessage());
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Thêm đánh giá thất bại: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi ghi log: " + logException.getMessage());
+            }
+            // Ghi log lỗi khi gặp ngoại lệ
+            System.out.println("Lỗi thêm đánh giá: " + e.getMessage());
             return false;
-        } catch (SQLException e) {
-            System.out.println("Lỗi cơ sở dữ liệu: " + e.getMessage());
+        }  catch (SQLException e) {
+            // Xử lý lỗi trong cơ sở dữ liệu (cập nhật ảnh đại diện hoặc ghi log)
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi cơ sở dữ liệu trong qua trình thêm đánh giá: " + e.getMessage()));
+            } catch (SQLException logException) {
+                // Xử lý lỗi ghi log nếu có
+                System.out.println("Lỗi ghi log: " + logException.getMessage());
+            }
+            System.out.println("Lỗi cơ sở dữ liệu trong quá trình thêm đánh giá: " + e.getMessage());
             return false;
         }
-    }
+    }      
 
     /**
      * Lấy danh sách nhận xét của một sách cụ thể.
@@ -71,21 +102,48 @@ public class ReviewService {
      */
     public List<ReviewEntity> getReviewsByBookId(int bookId) {
         try {
-            // Kiểm tra giá trị đầu vào
-            if (bookId <= 0) {
-                throw new IllegalArgumentException("ID sách không được để trống và phải là số dương.");
+            // Kiểm tra người dùng đã đăng nhập hay chưa
+            if (userService.getLoginUser() == null) {
+                throw new IllegalStateException("Bạn cần đăng nhập trước khi lấy đánh giá của sách");
             }
 
+            // Kiểm tra giá trị đầu vào
+            if (bookId <= 0) {
+                // Ghi log khi ID sách không hợp lệ
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(),"Lỗi khi lấy nhận xét: ID sách không hợp lệ"));
+                throw new IllegalArgumentException("ID sách không được để trống và phải là số dương");
+            }
+    
             // Truy vấn danh sách nhận xét từ cơ sở dữ liệu
-            return reviewDao.findReviewsByBookId(bookId);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Lỗi: " + e.getMessage());
+            List<ReviewEntity> reviews = reviewDao.findReviewsByBookId(bookId);
+    
+            // Ghi log nếu lấy nhận xét thành công
+            logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lấy danh sách nhận xét thành công cho sách ID: " + bookId));
+    
+            return reviews;
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            try {
+                
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi khi lấy nhận xét: " + e.getMessage()));
+            } catch (SQLException logError) {
+                System.out.println("Lỗi ghi log khi gặp lỗi ID không hợp lệ: " + logError.getMessage());
+            }
+    
+            // Ghi thông báo lỗi ra console
+            System.out.println("Lỗi lấy danh sách đánh giá theo ID của sách: " + e.getMessage());
             return Collections.emptyList();
         } catch (SQLException e) {
+            try {
+                // Ghi log khi có lỗi cơ sở dữ liệu
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(),"Lỗi cơ sở dữ liệu khi lấy nhận xét: " + e.getMessage()));
+            } catch (SQLException logError) {
+                System.out.println("Lỗi ghi log khi gặp lỗi cơ sở dữ liệu: " + logError.getMessage());
+            }
+            // Ghi thông báo lỗi cơ sở dữ liệu ra console
             System.out.println("Lỗi cơ sở dữ liệu: " + e.getMessage());
             return Collections.emptyList();
         }
-    }
+    }      
 
     /**
      * Lấy danh sách nhận xét của người dùng hiện tại.
@@ -96,19 +154,42 @@ public class ReviewService {
         try {
             // Kiểm tra người dùng đã đăng nhập hay chưa
             if (userService.getLoginUser() == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập để xem nhận xét.");
+                throw new IllegalStateException("Bạn cần đăng nhập trước khi lấy đánh giá của người dùng");
             }
-
+    
             // Truy vấn danh sách nhận xét từ cơ sở dữ liệu
-            return reviewDao.findReviewsByUserName(userService.getLoginUser().getUserName());
-        } catch (IllegalStateException e) {
-            System.out.println("Lỗi: " + e.getMessage());
+            List<ReviewEntity> reviews = reviewDao.findReviewsByUserName(userService.getLoginUser().getUserName());
+    
+            // Ghi log khi lấy nhận xét thành công
+            logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                userService.getLoginUser().getUserName(), 
+                "Lấy danh sách nhận xét thành công"));
+    
+            return reviews;
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            try {
+                
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi khi lấy nhận xét: " + e.getMessage()));
+            } catch (SQLException logError) {
+                System.out.println("Lỗi ghi log khi gặp lỗi ID không hợp lệ: " + logError.getMessage());
+            }
+    
+            // Ghi thông báo lỗi ra console
+            System.out.println("Lỗi lấy danh sách đánh giá theo ID người dùng: " + e.getMessage());
             return Collections.emptyList();
         } catch (SQLException e) {
+            try {
+                // Ghi log khi có lỗi cơ sở dữ liệu
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(),"Lỗi cơ sở dữ liệu khi lấy nhận xét: " + e.getMessage()));
+            } catch (SQLException logError) {
+                System.out.println("Lỗi ghi log khi gặp lỗi cơ sở dữ liệu: " + logError.getMessage());
+            }
+            // Ghi thông báo lỗi cơ sở dữ liệu ra console
             System.out.println("Lỗi cơ sở dữ liệu: " + e.getMessage());
             return Collections.emptyList();
         }
     }
+    
 
     /**
      * Cập nhật nhận xét của người dùng.
@@ -120,27 +201,77 @@ public class ReviewService {
      */
     public boolean updateReview(int reviewId, int rating, String comment) {
         try {
+            // Kiểm tra người dùng đã đăng nhập hay chưa
+            if (userService.getLoginUser() == null) {
+                throw new IllegalStateException("Bạn cần đăng nhập trước khi cập nhật đánh giá");
+            }
+    
             // Kiểm tra giá trị đầu vào
             if (reviewId <= 0) {
-                throw new IllegalArgumentException("ID nhận xét không được để trống và phải là số dương.");
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Cập nhật đánh giá thất bại: ID đánh giá không hợp lệ"));
+                throw new IllegalArgumentException("ID nhận xét không được để trống và phải là số dương");
             }
+    
             if (rating < 1 || rating > 5) {
-                throw new IllegalArgumentException("Đánh giá phải nằm trong khoảng từ 1 đến 5.");
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Cập nhật đánh giá thất bại: Đánh giá không hợp lệ"));
+                throw new IllegalArgumentException("Đánh giá phải nằm trong khoảng từ 1 đến 5");
             }
+    
             if (comment == null || comment.trim().isEmpty()) {
-                throw new IllegalArgumentException("Nhận xét không được để trống.");
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Cập nhật đánh giá thất bại: Nhận xét không hợp lệ"));
+                throw new IllegalArgumentException("Nhận xét không được để trống");
             }
-
+    
             // Thực hiện cập nhật nhận xét
-            return reviewDao.updateReview(reviewId, rating, comment);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Lỗi: " + e.getMessage());
+            boolean result = reviewDao.updateReview(reviewId, rating, comment);
+    
+            if (result) {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Cập nhật đánh giá thành công: ID đánh giá " + reviewId));
+            } else {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Cập nhật đánh giá thất bại: Không thể cập nhật ID đánh giá " + reviewId));
+            }
+    
+            return result;
+    
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            // Ghi log lỗi khi gặp ngoại lệ IllegalStateException hoặc IllegalArgumentException
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Cập nhật đánh giá thất bại: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi ghi log: " + logException.getMessage());
+            }
+    
+            // Ghi log lỗi và trả về false
+            System.out.println("Lỗi cập nhật đánh giá: " + e.getMessage());
             return false;
+            
         } catch (SQLException e) {
-            System.out.println("Lỗi cơ sở dữ liệu: " + e.getMessage());
+            // Ghi log lỗi cơ sở dữ liệu
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Lỗi cơ sở dữ liệu khi cập nhật đánh giá: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi ghi log: " + logException.getMessage());
+            }
+    
+            // Ghi log và trả về false khi có lỗi cơ sở dữ liệu
+            System.out.println("Lỗi cơ sở dữ liệu khi cập nhật đánh giá: " + e.getMessage());
             return false;
         }
-    }
+    }    
 
     /**
      * Xóa nhận xét của người dùng.
@@ -150,19 +281,62 @@ public class ReviewService {
      */
     public boolean deleteReview(int reviewId) {
         try {
-            // Kiểm tra giá trị đầu vào
-            if (reviewId <= 0) {
-                throw new IllegalArgumentException("ID nhận xét không được để trống và phải là số dương.");
+            // Kiểm tra người dùng đã đăng nhập hay chưa
+            if (userService.getLoginUser() == null) {
+                throw new IllegalStateException("Bạn cần đăng nhập trước khi xóa đánh giá");
             }
-
+    
+            // Kiểm tra ID nhận xét hợp lệ
+            if (reviewId <= 0) {
+                // Ghi log nếu ID nhận xét không hợp lệ
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Xóa đánh giá thất bại: ID nhận xét không hợp lệ"));
+                throw new IllegalArgumentException("ID nhận xét không được để trống và phải là số dương");
+            }
+    
             // Thực hiện xóa nhận xét
-            return reviewDao.deleteReview(reviewId);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Lỗi: " + e.getMessage());
+            boolean result = reviewDao.deleteReview(reviewId, userService.getLoginUser().getUserName());
+    
+            // Ghi log thành công hoặc thất bại khi xóa
+            if (result) {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Xóa đánh giá thành công: ID nhận xét " + reviewId));
+            } else {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Xóa đánh giá thất bại: Không thể xóa ID nhận xét " + reviewId));
+            }
+    
+            return result;
+    
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            // Ghi log lỗi khi gặp ngoại lệ IllegalStateException hoặc IllegalArgumentException
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Xóa đánh giá thất bại: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi ghi log: " + logException.getMessage());
+            }
+    
+            // Ghi log lỗi và trả về false
+            System.out.println("Lỗi xóa đánh giá: " + e.getMessage());
             return false;
         } catch (SQLException e) {
-            System.out.println("Lỗi cơ sở dữ liệu: " + e.getMessage());
+            // Ghi log lỗi cơ sở dữ liệu
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), 
+                    userService.getLoginUser().getUserName(), 
+                    "Lỗi cơ sở dữ liệu khi xóa đánh giá: " + e.getMessage()));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi ghi log: " + logException.getMessage());
+            }
+    
+            // Ghi log và trả về false khi có lỗi cơ sở dữ liệu
+            System.out.println("Lỗi cơ sở dữ liệu khi xóa đánh giá: " + e.getMessage());
             return false;
         }
-    }
+    }    
 }

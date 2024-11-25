@@ -58,5 +58,5 @@ public interface ReviewDao {
      * @return true nếu xóa đánh giá thành công, false nếu có lỗi.
      * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
      */
-    boolean deleteReview(int reviewId) throws SQLException;
+    boolean deleteReview(int reviewId, String userName) throws SQLException;
 }

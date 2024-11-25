@@ -13,7 +13,7 @@ public class UserEntity extends BaseEntity {
     private String lastName;
     private String email;
     private String phoneNumber;
-    private String profileImageDirectory;
+    private String profileImageDirectory = "https://cdn.kona-blue.com/upload/kona-blue_com/post/images/2024/09/18/457/avatar-mac-dinh-12.jpg";
     private Roles role = Roles.USER;
 
     /**
@@ -43,11 +43,22 @@ public class UserEntity extends BaseEntity {
      * @param firstName           Tên của người dùng.
      * @param lastName            Họ của người dùng.
      * @param phoneNumber         Số điện thoại của người dùng.
-     * @param profileImageDirectory Đường dẫn ảnh đại diện của người dùng.
      */
     public UserEntity(String userName, String passwordHash, String email, 
+                      String firstName, String lastName, String phoneNumber) {
+        this.userName = userName;
+        this.passwordHash = passwordHash;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
+
+    // Constructor đầy đủ với id, ảnh đại diện, và role
+    public UserEntity(int userId, String userName, String passwordHash, String email, 
                       String firstName, String lastName, String phoneNumber, 
-                      String profileImageDirectory) {
+                      String profileImageDirectory, Roles role) {
+        super(userId);
         this.userName = userName;
         this.passwordHash = passwordHash;
         this.firstName = firstName;
@@ -55,7 +66,7 @@ public class UserEntity extends BaseEntity {
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.profileImageDirectory = profileImageDirectory;
-        // this.role = role;
+        this.role = role;
     }
 
     // Các phương thức getter và setter cho các thuộc tính của người dùng

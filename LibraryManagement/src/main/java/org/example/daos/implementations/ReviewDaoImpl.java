@@ -129,10 +129,11 @@ public class ReviewDaoImpl implements ReviewDao {
      * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     @Override
-    public boolean deleteReview(int reviewId) throws SQLException {
-        String query = "DELETE FROM Reviews WHERE reviewId = ?";
+    public boolean deleteReview(int reviewId, String userName) throws SQLException {
+        String query = "DELETE FROM Reviews WHERE reviewId = ? and userName = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, reviewId);
+            preparedStatement.setString(2, userName);
             return preparedStatement.executeUpdate() > 0;
         }
     }

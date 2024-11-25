@@ -3,51 +3,99 @@ package org.example.controllers;
 import org.example.models.UserEntity;
 import org.example.services.basics.UserService;
 
-// Lớp điều khiển để xử lý các yêu cầu từ người dùng liên quan đến User
+/**
+ * Lớp Controller chịu trách nhiệm xử lý các hành động liên quan đến người dùng như đăng ký, đăng nhập, và cập nhật thông tin người dùng.
+ * Lớp này hoạt động như một cầu nối giữa giao diện người dùng (UI) và các dịch vụ nền tảng để quản lý dữ liệu người dùng.
+ */
 public class UserController {
+    
+    // Đối tượng UserService được sử dụng để xử lý các logic nghiệp vụ liên quan đến các thao tác của người dùng.
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    /**
+     * Constructor khởi tạo đối tượng UserService.
+     * Phương thức này được gọi khi tạo một đối tượng UserController để quản lý các thao tác liên quan đến người dùng.
+     */
+    public UserController() {
+        this.userService = new UserService();
     }
 
-    // Gọi dịch vụ để đăng ký người dùng mới và trả về kết quả
+    /**
+     * Đăng ký người dùng mới bằng cách gọi dịch vụ UserService để xử lý logic đăng ký.
+     * 
+     * @param user Đối tượng UserEntity chứa thông tin đăng ký của người dùng (ví dụ: tên người dùng, mật khẩu, email).
+     * @return boolean Trả về true nếu đăng ký thành công, false nếu thất bại.
+     */
     public boolean registerUser(UserEntity user) {
-        return userService.registerUser(user);  // Trả về true nếu thành công, false nếu thất bại
+        return userService.registerUser(user);  // Gọi UserService để đăng ký người dùng và trả về kết quả.
     }
 
-    // Gọi dịch vụ để đăng nhập người dùng và trả về UserEntity nếu thành công, hoặc null nếu thất bại
+    /**
+     * Đăng nhập người dùng bằng cách kiểm tra thông tin đăng nhập với dữ liệu đã lưu trữ thông qua UserService.
+     * 
+     * @param userName Tên người dùng mà người dùng nhập vào.
+     * @param password Mật khẩu mà người dùng nhập vào.
+     * @return UserEntity Trả về đối tượng UserEntity nếu đăng nhập thành công, null nếu thất bại.
+     */
     public UserEntity loginUser(String userName, String password) {
-        return userService.loginUser(userName, password);  // Trả về UserEntity nếu đăng nhập thành công, null nếu thất bại
+        return userService.loginUser(userName, password);  // Gọi UserService để thực hiện đăng nhập và trả về đối tượng UserEntity nếu thành công.
     }
 
-    // Gọi dịch vụ để đăng xuất người dùng và trả về kết quả
+    /**
+     * Đăng xuất người dùng bằng cách gọi dịch vụ UserService để xử lý logic đăng xuất.
+     * 
+     * @return boolean Trả về true nếu đăng xuất thành công, false nếu thất bại.
+     */
     public boolean logoutUser() {
-        return userService.logoutUser();  // Trả về true nếu đăng xuất thành công, false nếu thất bại
+        return userService.logoutUser();  // Gọi UserService để đăng xuất người dùng và trả về kết quả.
     }
 
-    // Gọi dịch vụ để thay đổi mật khẩu người dùng và trả về kết quả
+    /**
+     * Thay đổi mật khẩu của người dùng thông qua dịch vụ UserService.
+     * 
+     * @param newPassword Mật khẩu mới mà người dùng muốn thay đổi.
+     * @return boolean Trả về true nếu thay đổi mật khẩu thành công, false nếu thất bại.
+     */
     public boolean changePassword(String newPassword) {
-        return userService.changePassword(newPassword);  // Trả về true nếu thay đổi mật khẩu thành công, false nếu thất bại
+        return userService.changePassword(newPassword);  // Gọi UserService để thay đổi mật khẩu và trả về kết quả.
     }
 
-    // Gọi dịch vụ để cập nhật email người dùng và trả về kết quả
+    /**
+     * Cập nhật email của người dùng thông qua dịch vụ UserService.
+     * 
+     * @param newEmail Email mới mà người dùng muốn cập nhật.
+     * @return boolean Trả về true nếu cập nhật email thành công, false nếu thất bại.
+     */
     public boolean updateEmail(String newEmail) {
-        return userService.updateEmail(newEmail);  // Trả về true nếu cập nhật email thành công, false nếu thất bại
+        return userService.updateEmail(newEmail);  // Gọi UserService để cập nhật email và trả về kết quả.
     }
 
-    // Gọi dịch vụ để cập nhật số điện thoại người dùng và trả về kết quả
+    /**
+     * Cập nhật số điện thoại của người dùng thông qua dịch vụ UserService.
+     * 
+     * @param newPhoneNumber Số điện thoại mới mà người dùng muốn cập nhật.
+     * @return boolean Trả về true nếu cập nhật số điện thoại thành công, false nếu thất bại.
+     */
     public boolean updatePhoneNumber(String newPhoneNumber) {
-        return userService.updatePhoneNumber(newPhoneNumber);  // Trả về true nếu cập nhật số điện thoại thành công, false nếu thất bại
+        return userService.updatePhoneNumber(newPhoneNumber);  // Gọi UserService để cập nhật số điện thoại và trả về kết quả.
     }
 
-    // Gọi dịch vụ để cập nhật ảnh hồ sơ người dùng và trả về kết quả
+    /**
+     * Cập nhật ảnh hồ sơ của người dùng thông qua dịch vụ UserService.
+     * 
+     * @param newProfileImageDirectory Đường dẫn đến ảnh hồ sơ mới mà người dùng muốn cập nhật.
+     * @return boolean Trả về true nếu cập nhật ảnh hồ sơ thành công, false nếu thất bại.
+     */
     public boolean updateProfileImage(String newProfileImageDirectory) {
-        return userService.updateProfileImage(newProfileImageDirectory);  // Trả về true nếu cập nhật ảnh hồ sơ thành công, false nếu thất bại
+        return userService.updateProfileImage(newProfileImageDirectory);  // Gọi UserService để cập nhật ảnh hồ sơ và trả về kết quả.
     }
 
-    // Lấy thông tin người dùng
+    /**
+     * Lấy thông tin người dùng hiện tại từ dịch vụ UserService.
+     * 
+     * @return UserEntity Trả về đối tượng UserEntity chứa thông tin người dùng, hoặc null nếu không tìm thấy.
+     */
     public UserEntity getUserInfo() {
-        return userService.getUserInfo();  // Trả về UserEntity hoặc null nếu không tìm thấy
+        return userService.getUserInfo();  // Gọi UserService để lấy thông tin người dùng và trả về đối tượng UserEntity hoặc null nếu không có.
     }
 }
