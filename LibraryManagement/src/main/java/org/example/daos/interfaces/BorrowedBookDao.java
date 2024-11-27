@@ -2,80 +2,100 @@ package org.example.daos.interfaces;
 
 import org.example.models.BorrowedBookEntity;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Giao diện cho các thao tác quản lý lịch sử mượn sách của người dùng.
+ * Giao diện cho các phương thức thao tác với dữ liệu sách mượn.
  */
 public interface BorrowedBookDao {
 
     /**
-     * Ghi nhận việc mượn sách của người dùng.
+     * Mượn sách.
      *
-     * @param borrowedBookId ID của cuốn sách được mượn.
-     * @param userName tên người dùng.
-     * @param borrowDate ngày mượn sách.
-     * @return true nếu ghi nhận mượn sách thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param borrowedBookId ID của sách mượn.
+     * @param userName Tên người dùng mượn sách.
+     * @param borrowDate Ngày mượn sách.
+     * @param returnDate Ngày trả sách.
+     * @return true nếu mượn sách thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
-    boolean borrowBook(int borrowedBookId, String userName, LocalDateTime borrowDate) throws SQLException;
+    boolean borrowBook(int borrowedBookId, String userName, LocalDate borrowDate, LocalDate returnDate) throws SQLException;
 
     /**
-     * Cập nhật khi người dùng trả sách.
+     * Trả sách.
      *
-     * @param borrowedBookId ID của cuốn sách trả lại.
-     * @param userName tên người dùng.
-     * @return true nếu trả sách thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param borrowedBookId ID của sách mượn.
+     * @param userName Tên người dùng trả sách.
+     * @return true nếu trả sách thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     boolean returnBook(int borrowedBookId, String userName) throws SQLException;
 
     /**
-     * Lấy danh sách các sách đã mượn của người dùng trong khoảng thời gian cho trước.
+     * Tìm danh sách sách mượn theo tên người dùng trong khoảng thời gian.
      *
-     * @param userName tên người dùng.
-     * @param startDate ngày bắt đầu khoảng thời gian.
-     * @param endDate ngày kết thúc khoảng thời gian.
-     * @return danh sách các cuốn sách đã mượn trong khoảng thời gian cho trước.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param userName Tên người dùng.
+     * @param startDate Ngày bắt đầu.
+     * @param endDate Ngày kết thúc.
+     * @return Danh sách BorrowedBookEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
-    List<BorrowedBookEntity> findBorrowedBooksByUser(String userName, LocalDateTime startDate, LocalDateTime endDate) throws SQLException;
+    List<BorrowedBookEntity> findBorrowedBooksByUser(String userName, LocalDate startDate, LocalDate endDate) throws SQLException;
 
     /**
-     * Lấy danh sách các sách chưa trả của người dùng.
+     * Tìm danh sách sách chưa trả theo tên người dùng.
      *
-     * @param userName tên người dùng.
-     * @return danh sách các cuốn sách chưa trả.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param userName Tên người dùng.
+     * @return Danh sách BorrowedBookEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     List<BorrowedBookEntity> findNotReturnedBooksByUser(String userName) throws SQLException;
 
     /**
-     * Kiểm tra xem một cuốn sách đã được người dùng mượn chưa.
+     * Tìm danh sách sách quá hạn theo tên người dùng.
      *
-     * @param borrowedBookId ID của cuốn sách.
-     * @param userName tên người dùng.
-     * @return true nếu người dùng đã mượn cuốn sách, false nếu chưa mượn.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param userName Tên người dùng.
+     * @param currentDate Ngày hiện tại.
+     * @return Danh sách BorrowedBookEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
+     */
+    List<BorrowedBookEntity> findOverdueBooksByUser(String userName, LocalDate currentDate) throws SQLException;
+
+    /**
+     * Kiểm tra sách có đang được mượn bởi người dùng không.
+     *
+     * @param borrowedBookId ID của sách mượn.
+     * @param userName Tên người dùng.
+     * @return true nếu sách đang được mượn bởi người dùng, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     boolean isBookBorrowedByUser(int borrowedBookId, String userName) throws SQLException;
 
     /**
-     * Lấy số lượng sách đã mượn của người dùng.
+     * Tìm số lượng sách mượn của người dùng.
      *
-     * @param userName tên người dùng.
-     * @return số lượng sách đã mượn.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param userName Tên người dùng.
+     * @return Số lượng sách mượn.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     int findBorrowedBooksCountByUser(String userName) throws SQLException;
 
     /**
-     * Lấy danh sách tất cả các sách mà người dùng đã mượn.
+     * Tìm tất cả sách mượn của người dùng.
      *
-     * @param userName tên người dùng.
-     * @return danh sách tất cả các cuốn sách đã mượn.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param userName Tên người dùng.
+     * @return Danh sách tất cả BorrowedBookEntity của người dùng.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     List<BorrowedBookEntity> findAllBorrowedBooksByUser(String userName) throws SQLException;
+
+    /**
+     * Tìm số lượng sách mượn theo ISBN.
+     *
+     * @param isbn ISBN của sách.
+     * @return Số lượng sách mượn.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
+     */
+    int findBorrowedBooksCountByIsbn(String isbn) throws SQLException;
 }

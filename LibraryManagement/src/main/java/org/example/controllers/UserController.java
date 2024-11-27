@@ -17,7 +17,7 @@ public class UserController {
      * Phương thức này được gọi khi tạo một đối tượng UserController để quản lý các thao tác liên quan đến người dùng.
      */
     public UserController() {
-        this.userService = new UserService();
+        this.userService = UserService.getInstance();
     }
 
     /**

@@ -4,7 +4,12 @@ import org.example.daos.interfaces.LogDao;
 import org.example.models.LogEntity;
 import org.example.utils.DatabaseConnection;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +18,10 @@ import java.util.List;
  * Lớp triển khai LogDAO để thực hiện các thao tác CRUD đối với nhật ký (logs).
  */
 public class LogDaoImpl implements LogDao {
-    private Connection connection;
+    private final Connection connection;
 
     /**
-     * Constructor để nhận đối tượng Connection từ lớp khác hoặc tạo mới nếu cần.
-     *
-     * @param connection đối tượng Connection để kết nối cơ sở dữ liệu.
+     * Hàm khởi tạo để thiết lập kết nối cơ sở dữ liệu.
      */
     public LogDaoImpl() {
         this.connection = DatabaseConnection.getConnection();
@@ -39,7 +42,7 @@ public class LogDaoImpl implements LogDao {
             statement.setString(2, logEntity.getUserName());
             statement.setString(3, logEntity.getActionDetails());
             int rowsInserted = statement.executeUpdate();
-            return rowsInserted > 0; // Nếu có bản ghi được thêm, trả về true
+            return rowsInserted > 0;
         }
     }
 
@@ -56,9 +59,9 @@ public class LogDaoImpl implements LogDao {
         try (Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(query)) {
             while (rs.next()) {
                 LogEntity logEntity = new LogEntity(
-                        rs.getTimestamp("timeStamp").toLocalDateTime(),
-                        rs.getString("userName"),
-                        rs.getString("actionDetails")
+                    rs.getTimestamp("timeStamp").toLocalDateTime(),
+                    rs.getString("userName"),
+                    rs.getString("actionDetails")
                 );
                 logs.add(logEntity);
             }
@@ -81,18 +84,18 @@ public class LogDaoImpl implements LogDao {
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
                     return new LogEntity(
-                            rs.getTimestamp("timeStamp").toLocalDateTime(),
-                            rs.getString("userName"),
-                            rs.getString("actionDetails")
+                        rs.getTimestamp("timeStamp").toLocalDateTime(),
+                        rs.getString("userName"),
+                        rs.getString("actionDetails")
                     );
                 }
-                return null; // Nếu không tìm thấy log
+                return null;
             }
         }
     }
 
     /**
-     * Lấy log theo userName.
+     * Lấy log theo tên người dùng.
      *
      * @param userName Tên người dùng.
      * @return Danh sách các đối tượng LogEntity.
@@ -107,9 +110,9 @@ public class LogDaoImpl implements LogDao {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     LogEntity logEntity = new LogEntity(
-                            rs.getTimestamp("timeStamp").toLocalDateTime(),
-                            rs.getString("userName"),
-                            rs.getString("actionDetails")
+                        rs.getTimestamp("timeStamp").toLocalDateTime(),
+                        rs.getString("userName"),
+                        rs.getString("actionDetails")
                     );
                     logs.add(logEntity);
                 }
@@ -136,9 +139,9 @@ public class LogDaoImpl implements LogDao {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     LogEntity logEntity = new LogEntity(
-                            rs.getTimestamp("timeStamp").toLocalDateTime(),
-                            rs.getString("userName"),
-                            rs.getString("actionDetails")
+                        rs.getTimestamp("timeStamp").toLocalDateTime(),
+                        rs.getString("userName"),
+                        rs.getString("actionDetails")
                     );
                     logs.add(logEntity);
                 }

@@ -5,58 +5,85 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Interface cho các thao tác CRUD đối với đánh giá của người dùng.
- * Cung cấp các phương thức để thêm, lấy, cập nhật và xóa đánh giá của người dùng.
+ * Giao diện cho các phương thức thao tác với dữ liệu đánh giá.
  */
 public interface ReviewDao {
 
     /**
-     * Thêm một đánh giá mới cho sách.
+     * Thêm đánh giá mới.
      *
-     * @param userName Tên của người dùng thực hiện đánh giá.
-     * @param bookId ID của sách được đánh giá.
-     * @param rating Điểm đánh giá (thường từ 1 đến 5).
-     * @param comment Nội dung bình luận của người dùng.
-     * @return true nếu thêm đánh giá thành công, false nếu có lỗi.
-     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @param userName Tên người dùng đánh giá.
+     * @param bookId   ID của sách được đánh giá.
+     * @param rating   Đánh giá (số sao).
+     * @param comment  Bình luận.
+     * @return true nếu thêm đánh giá thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     boolean addReview(String userName, int bookId, int rating, String comment) throws SQLException;
 
     /**
-     * Lấy danh sách các đánh giá của một cuốn sách.
+     * Tìm danh sách đánh giá theo ID sách.
      *
-     * @param bookId ID của sách cần lấy đánh giá.
-     * @return Danh sách các đối tượng ReviewEntity chứa thông tin đánh giá.
-     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @param bookId ID của sách.
+     * @return Danh sách ReviewEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     List<ReviewEntity> findReviewsByBookId(int bookId) throws SQLException;
 
     /**
-     * Lấy danh sách các đánh giá của một người dùng.
+     * Tìm danh sách đánh giá theo ISBN của sách.
      *
-     * @param userName Tên người dùng cần lấy các đánh giá của họ.
-     * @return Danh sách các đối tượng ReviewEntity chứa thông tin đánh giá của người dùng.
-     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @param isbn ISBN của sách.
+     * @return Danh sách ReviewEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
+     */
+    List<ReviewEntity> findReviewsByIsbn(String isbn) throws SQLException;
+
+    /**
+     * Tìm danh sách đánh giá theo tên người dùng.
+     *
+     * @param userName Tên người dùng.
+     * @return Danh sách ReviewEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     List<ReviewEntity> findReviewsByUserName(String userName) throws SQLException;
 
     /**
-     * Cập nhật một đánh giá đã tồn tại.
+     * Cập nhật đánh giá.
      *
-     * @param reviewId ID của đánh giá cần cập nhật.
-     * @param rating Điểm đánh giá mới.
-     * @param comment Nội dung bình luận mới.
-     * @return true nếu cập nhật đánh giá thành công, false nếu có lỗi.
-     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @param reviewId ID của đánh giá.
+     * @param rating   Đánh giá mới (số sao).
+     * @param comment  Bình luận mới.
+     * @return true nếu cập nhật thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     boolean updateReview(int reviewId, int rating, String comment) throws SQLException;
 
     /**
-     * Xóa một đánh giá.
+     * Xóa đánh giá.
      *
-     * @param reviewId ID của đánh giá cần xóa.
-     * @return true nếu xóa đánh giá thành công, false nếu có lỗi.
-     * @throws SQLException Nếu có lỗi xảy ra khi thao tác với cơ sở dữ liệu.
+     * @param reviewId  ID của đánh giá.
+     * @param userName  Tên người dùng đã đăng đánh giá.
+     * @return true nếu xóa thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     boolean deleteReview(int reviewId, String userName) throws SQLException;
+
+    /**
+     * Tìm điểm đánh giá trung bình theo ISBN của sách.
+     *
+     * @param isbn ISBN của sách.
+     * @return Điểm đánh giá trung bình.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
+     */
+    Double findAverageRatingByIsbn(String isbn) throws SQLException;
+
+    /**
+     * Tìm điểm đánh giá trung bình theo ID sách.
+     *
+     * @param bookId ID của sách.
+     * @return Điểm đánh giá trung bình.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
+     */
+    Double findAverageRatingById(int bookId) throws SQLException;
 }

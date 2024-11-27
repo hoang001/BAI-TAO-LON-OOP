@@ -30,23 +30,16 @@ public class SearchService {
     private final ReadBookService readBookService;
     private final BookService bookService;
     private final UserService userService;
-    private final LogDao logDao; 
+    private final LogDao logDao;
 
     /**
-     * Constructor khởi tạo các service cần thiết
-     * @param borrowedBookService Service quản lý sách mượn
-     * @param readBookService Service quản lý sách đã đọc
-     * @param bookService Service quản lý sách
-     * @param userService Service quản lý người dùng
-     * @param authorService Service quản lý tác giả
-     * @param categoryService Service quản lý thể loại sách
-     * @param publisherService Service quản lý nhà xuất bản
+     * Constructor.
      */
     public SearchService() {
         this.borrowedBookService = new BorrowedBookService();
         this.readBookService = new ReadBookService();
         this.bookService = new BookService();
-        this.userService = new UserService();
+        this.userService = UserService.getInstance();
         this.logDao = new LogDaoImpl();
     }
 
@@ -61,9 +54,6 @@ public class SearchService {
     public List<String> searchAuthorsByKeyword(String keyword) {
         // Kiểm tra xem người dùng đã đăng nhập chưa, nếu chưa thì yêu cầu đăng nhập
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi tìm kiếm");
-            }
             // Lấy danh sách các cuốn sách người dùng đã đọc và đã mượn
             List<ReadBookEntity> readBooks = readBookService.getReadBooksByUser();
             List<BorrowedBookEntity> borrowedBooks = borrowedBookService.getAllBorrowedBooksByUser();
@@ -165,9 +155,6 @@ public class SearchService {
     public List<String> searchCategoriesByKeyword(String keyword) {
         // Kiểm tra nếu người dùng chưa đăng nhập
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi tìm kiếm");
-            }
             // Lấy danh sách sách đã đọc và đã mượn
             List<ReadBookEntity> readBooks = readBookService.getReadBooksByUser();
             List<BorrowedBookEntity> borrowedBooks = borrowedBookService.getAllBorrowedBooksByUser();
@@ -251,16 +238,10 @@ public class SearchService {
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
-            e.printStackTrace();
             return Collections.emptyList();
         } catch (IllegalArgumentException e) {
             // Xử lý ngoại lệ liên quan đến đầu vào không hợp lệ
             System.out.println("Lỗi: " + e.getMessage());
-            try {
-                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi đầu vào: " + e.getMessage()));
-            } catch (SQLException logException) {
-                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
-            }
             return Collections.emptyList();
         }
     }    
@@ -277,9 +258,6 @@ public class SearchService {
     public List<String> searchPublishersByKeyword(String keyword) {
         // Kiểm tra nếu người dùng chưa đăng nhập
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi tìm kiếm");
-            }
             List<ReadBookEntity> readBooks = readBookService.getReadBooksByUser();
             List<BorrowedBookEntity> borrowedBooks = borrowedBookService.getAllBorrowedBooksByUser();
     
@@ -362,17 +340,109 @@ public class SearchService {
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
-            e.printStackTrace();
             return Collections.emptyList();
         } catch (IllegalArgumentException e) {
             // Xử lý ngoại lệ liên quan đến đầu vào không hợp lệ
             System.out.println("Lỗi: " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Tìm sách theo tiêu đề.
+     * @param keyword tiêu đề cần tìm.
+     * @return trả về gợi ý tìm kiếm.
+     */
+    public List<String> searchTitlesByKeyword(String keyword) {
+        // Kiểm tra nếu người dùng chưa đăng nhập
+        try {
+            List<ReadBookEntity> readBooks = readBookService.getReadBooksByUser();
+            List<BorrowedBookEntity> borrowedBooks = borrowedBookService.getAllBorrowedBooksByUser();
+    
+            // Kết hợp tất cả các sách đã đọc và đã mượn vào một danh sách chung
+            List<BookEntity> allBooks = new ArrayList<>();
+            for (ReadBookEntity readBook : readBooks) {
+                BookEntity book = bookService.getBookById(readBook.getBookId());
+                if (book != null) {
+                    allBooks.add(book); // Thêm sách đã đọc vào danh sách
+                }
+            }
+    
+            for (BorrowedBookEntity borrowedBook : borrowedBooks) {
+                BookEntity book = bookService.getBookById(borrowedBook.getBookId());
+                if (book != null) {
+                    allBooks.add(book); // Thêm sách đã mượn vào danh sách
+                }
+            }
+    
+            String normalizedKeyword = keyword.toLowerCase(); // Chuyển từ khóa tìm kiếm thành chữ thường
+    
+            // Khởi tạo một ExecutorService để xử lý song song các tác vụ tìm kiếm
+            ExecutorService executor = Executors.newFixedThreadPool(4); // Sử dụng thread pool với 4 luồng
+            List<Callable<List<String>>> tasks = new ArrayList<>(); // Danh sách các tác vụ tìm kiếm
+    
+            // Chia các cuốn sách thành các phần nhỏ để xử lý song song
+            int partitionSize = allBooks.size() / 4 + 1;
+    
+            // Phân chia các cuốn sách thành các phần nhỏ và thêm vào danh sách tác vụ
+            for (int i = 0; i < allBooks.size(); i += partitionSize) {
+                final List<BookEntity> sublist = allBooks.subList(i, Math.min(i + partitionSize, allBooks.size()));
+                tasks.add(() -> sublist.stream()
+                        .map(book -> {
+                            return book.getCategoryName(); // Nếu tìm thấy nhà xuất bản, trả về tên
+                        })
+                        .filter(Objects::nonNull) // Lọc các kết quả không có nhà xuất bản
+                        .filter(publisher -> publisher.toLowerCase().contains(normalizedKeyword)) // So sánh từ khóa với tên nhà xuất bản
+                        .distinct() // Lọc các nhà xuất bản trùng lặp
+                        .collect(Collectors.toList())); // Thu thập kết quả vào danh sách
+            }
+    
+            // Thực thi các tác vụ song song
+            List<Future<List<String>>> futures = executor.invokeAll(tasks); // Thực thi tất cả các tác vụ
+            Set<String> resultSet = new TreeSet<>(); // Sử dụng TreeSet để lưu trữ các nhà xuất bản mà không có bản sao
+            for (Future<List<String>> future : futures) {
+                resultSet.addAll(future.get()); // Thêm kết quả từ các tác vụ vào resultSet
+            }
+    
+            executor.shutdown(); // Đóng ExecutorService
+    
+            // Tạo danh sách kết quả cuối cùng
+            List<String> result = new ArrayList<>(resultSet);
+    
+            // Đưa các nhà xuất bản có trong sách đã đọc và sách đã mượn lên đầu
+            List<String> prioritizedCategorys = new ArrayList<>();
+            for (BookEntity book : allBooks) {
+                if (book != null && result.contains(book.getCategoryName())) {
+                    prioritizedCategorys.add(book.getCategoryName());
+                    result.remove(book.getCategoryName());
+                }
+            }
+    
+            // Kết hợp danh sách ưu tiên và danh sách còn lại
+            prioritizedCategorys.addAll(result.stream().sorted().collect(Collectors.toList()));
+    
+            // Ghi log tìm kiếm thành công
             try {
-                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi đầu vào: " + e.getMessage()));
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Tìm kiếm nhà xuất bản thành công với từ khóa: " + keyword));
+            } catch (SQLException logException) {
+                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
+            }
+    
+            // Trả về danh sách 5 nhà xuất bản đầu tiên sau khi sắp xếp
+            return prioritizedCategorys.stream().limit(5).collect(Collectors.toList());
+        } catch (InterruptedException | ExecutionException e) {
+            // Xử lý ngoại lệ khi thực thi tác vụ song song
+            System.out.println("Lỗi: " + e.getMessage());
+            try {
+                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi khi tìm kiếm nhà xuất bản: " + e.getMessage()));
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
             return Collections.emptyList();
+        } catch (IllegalArgumentException e) {
+            // Xử lý ngoại lệ liên quan đến đầu vào không hợp lệ
+            System.out.println("Lỗi: " + e.getMessage());
+            return Collections.emptyList();
         }
-    }    
+    }
 }

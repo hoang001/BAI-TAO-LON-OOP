@@ -75,4 +75,22 @@ public class ReviewController {
     public boolean deleteReview(int reviewId) {
         return reviewService.deleteReview(reviewId);  // Gọi phương thức của ReviewService để xóa đánh giá.
     }
+
+    /**
+     * Lấy điểm trung bình theo ISBN.
+     * @param isbn tham số đầu vào.
+     * @return điểm trung bình.
+     */
+    public Double getAverageRatingByIsbn(String isbn) {
+        return reviewService.getAverageRatingByIsbn(isbn);
+    }
+
+    /**
+     * Lấy điểm trung bình theo ID.
+     * @param bookId tham số đầu vào.
+     * @return điểm trung bình.
+     */
+    public Double getAverageRatingById(int bookId) {
+        return reviewService.getAverageRatingById(bookId);
+    }
 }

@@ -50,4 +50,8 @@ public class SearchController {
     public List<String> searchPublishersByKeyword(String keyword) {
         return searchService.searchPublishersByKeyword(keyword);  // Gọi phương thức của SearchService để tìm kiếm nhà xuất bản.
     }
+
+    public List<String> searchTitleByKeyword(String keyword) {
+        return searchService.searchTitlesByKeyword(keyword);
+    }
 }

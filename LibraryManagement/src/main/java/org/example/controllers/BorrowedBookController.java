@@ -3,7 +3,7 @@ package org.example.controllers;
 import org.example.models.BorrowedBookEntity;
 import org.example.services.basics.BorrowedBookService;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -32,8 +32,8 @@ public class BorrowedBookController {
      * @param borrowDate Thời gian mượn sách.
      * @return boolean Trả về true nếu mượn sách thành công, false nếu thất bại.
      */
-    public boolean borrowBook(int borrowedBookId, LocalDateTime borrowDate) {
-        return borrowedBookService.borrowBook(borrowedBookId, borrowDate);  // Gọi phương thức của BorrowedBookService để ghi nhận mượn sách.
+    public boolean borrowBook(int borrowedBookId, LocalDate borrowDate, LocalDate returnDate) {
+        return borrowedBookService.borrowBook(borrowedBookId, borrowDate, returnDate);  // Gọi phương thức của BorrowedBookService để ghi nhận mượn sách.
     }
 
     /**
@@ -43,7 +43,7 @@ public class BorrowedBookController {
      * @param returnDate Thời gian trả sách.
      * @return boolean Trả về true nếu trả sách thành công, false nếu thất bại.
      */
-    public boolean returnBook(int borrowedBookId, LocalDateTime returnDate) {
+    public boolean returnBook(int borrowedBookId, LocalDate returnDate) {
         return borrowedBookService.returnBook(borrowedBookId, returnDate);  // Gọi phương thức của BorrowedBookService để ghi nhận trả sách.
     }
 
@@ -63,7 +63,7 @@ public class BorrowedBookController {
      * @param endDate Thời gian kết thúc của khoảng thời gian.
      * @return List<BorrowedBookEntity> Danh sách sách mượn của người dùng trong khoảng thời gian từ startDate đến endDate.
      */
-    public List<BorrowedBookEntity> listBorrowedBooksByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+    public List<BorrowedBookEntity> listBorrowedBooksByDateRange(LocalDate startDate, LocalDate endDate) {
         return borrowedBookService.getBorrowedBooksByUserAndDateRange(startDate, endDate);  // Gọi phương thức của BorrowedBookService để lấy danh sách sách mượn trong khoảng thời gian.
     }
 

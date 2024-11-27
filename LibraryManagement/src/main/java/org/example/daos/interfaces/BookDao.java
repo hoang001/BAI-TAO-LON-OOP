@@ -5,128 +5,134 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Giao diện cho các thao tác CRUD đối với BookEntity.
+ * Giao diện cho các phương thức thao tác với dữ liệu sách.
  */
 public interface BookDao {
 
     /**
-     * Thêm một cuốn sách mới.
+     * Thêm sách mới vào cơ sở dữ liệu.
      *
-     * @param book đối tượng BookEntity chứa thông tin sách.
-     * @return true nếu thêm sách thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param book Đối tượng BookEntity chứa thông tin sách cần thêm.
+     * @return true nếu thêm sách thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     boolean addBook(BookEntity book) throws SQLException;
 
     /**
-     * Xóa một cuốn sách theo ID.
+     * Xóa sách theo ID.
      *
-     * @param bookId ID của cuốn sách cần xóa.
-     * @return true nếu xóa sách thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param bookId ID của sách cần xóa.
+     * @return true nếu xóa sách thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     boolean deleteBookById(int bookId) throws SQLException;
 
     /**
-     * Xóa một cuốn sách theo ISBN.
+     * Xóa sách theo ISBN.
      *
-     * @param isbn ISBN của cuốn sách cần xóa.
-     * @return true nếu xóa sách thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param isbn ISBN của sách cần xóa.
+     * @return true nếu xóa sách thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     boolean deleteBookByIsbn(String isbn) throws SQLException;
 
     /**
      * Cập nhật thông tin sách.
      *
-     * @param book đối tượng BookEntity chứa thông tin sách cập nhật.
-     * @return true nếu cập nhật thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param book Đối tượng BookEntity chứa thông tin sách cần cập nhật.
+     * @return true nếu cập nhật thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     boolean updateBook(BookEntity book) throws SQLException;
 
     /**
-     * Cập nhật trạng thái của cuốn sách (có sẵn hay không).
+     * Cập nhật trạng thái có sẵn của sách.
      *
-     * @param bookId ID của cuốn sách.
-     * @param available trạng thái có sẵn của sách.
-     * @return true nếu cập nhật trạng thái thành công, false nếu có lỗi.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param bookId ID của sách.
+     * @param available Trạng thái có sẵn của sách.
+     * @return true nếu cập nhật thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     boolean updateBookAvailability(int bookId, boolean available) throws SQLException;
 
+    /**
+     * Cập nhật số lượng sách.
+     *
+     * @param isbn ISBN của sách.
+     * @param quantity Số lượng sách cần cập nhật.
+     * @return true nếu cập nhật thành công, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
+     */
     boolean updateBookQuantity(String isbn, int quantity) throws SQLException;
 
     /**
      * Tìm sách theo ISBN.
      *
-     * @param isbn ISBN của cuốn sách.
-     * @return danh sách các cuốn sách có ISBN trùng khớp.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param isbn ISBN của sách.
+     * @return Đối tượng BookEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     BookEntity findBookByIsbn(String isbn) throws SQLException;
 
     /**
      * Tìm sách theo tiêu đề.
      *
-     * @param title tiêu đề của cuốn sách.
-     * @return danh sách các cuốn sách có tiêu đề trùng khớp.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param title Tiêu đề sách.
+     * @return Danh sách BookEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     List<BookEntity> findBooksByTitle(String title) throws SQLException;
 
     /**
-     * Tìm sách theo tác giả.
+     * Tìm sách theo tên tác giả.
      *
-     * @param authorName tên tác giả của cuốn sách.
-     * @return danh sách các cuốn sách có tác giả trùng khớp.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param authorName Tên tác giả.
+     * @return Danh sách BookEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     List<BookEntity> findBooksByAuthor(String authorName) throws SQLException;
 
     /**
      * Tìm sách theo thể loại.
      *
-     * @param genre thể loại của cuốn sách.
-     * @return danh sách các cuốn sách thuộc thể loại trùng khớp.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param genre Thể loại sách.
+     * @return Danh sách BookEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     List<BookEntity> findBooksByGenre(String genre) throws SQLException;
 
     /**
-     * Tìm sách theo tên nhà xuất bản.
+     * Tìm sách theo nhà xuất bản.
      *
-     * @param publisherName tên nhà xuất bản của cuốn sách.
-     * @return danh sách các cuốn sách có nhà xuất bản trùng khớp.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param publisherName Tên nhà xuất bản.
+     * @return Danh sách BookEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     List<BookEntity> findBooksByPublisher(String publisherName) throws SQLException;
 
     /**
-     * Lấy tất cả các cuốn sách trong cơ sở dữ liệu.
+     * Tìm tất cả sách.
      *
-     * @return danh sách tất cả các cuốn sách.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @return Danh sách tất cả BookEntity trong cơ sở dữ liệu.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     List<BookEntity> findAllBooks() throws SQLException;
-
-    // /**
-    //  * Đếm số lượng sách có sẵn (đang ở trạng thái true) theo ISBN.
-    //  *
-    //  * @param isbn ISBN của cuốn sách.
-    //  * @return số lượng sách có sẵn.
-    //  * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
-    //  */
-    // int countAvailableBooksByIsbn(String isbn) throws SQLException;
 
     /**
      * Tìm sách theo ID.
      *
-     * @param bookId ID của cuốn sách.
-     * @return đối tượng BookEntity chứa thông tin sách, null nếu không tìm thấy.
-     * @throws SQLException nếu có lỗi khi thao tác với cơ sở dữ liệu.
+     * @param bookId ID của sách.
+     * @return Đối tượng BookEntity nếu tìm thấy, ngược lại null.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
      */
     BookEntity findBookById(int bookId) throws SQLException;
 
+    /**
+     * Kiểm tra sách có tồn tại trong cơ sở dữ liệu không.
+     *
+     * @param isbn ISBN của sách.
+     * @return true nếu sách tồn tại, ngược lại false.
+     * @throws SQLException nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
+     */
     boolean isBookInDatabase(String isbn) throws SQLException;
 }

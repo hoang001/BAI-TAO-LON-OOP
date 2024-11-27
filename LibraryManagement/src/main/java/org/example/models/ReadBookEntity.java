@@ -1,65 +1,61 @@
 package org.example.models;
 
 /**
- * Lớp này đại diện cho thực thể sách đã đọc, mở rộng từ BaseEntity.
- * Lớp này lưu trữ thông tin về sách mà người dùng đã đọc, bao gồm ID sách và tên người dùng.
+ * Lớp đại diện cho sách đã đọc của người dùng.
  */
 public class ReadBookEntity extends BaseEntity {
-    
-    // Thuộc tính của lớp ReadBookEntity
-    private int bookId;       // ID của sách đã đọc
-    private String userName;  // Tên người dùng đã đọc sách
+    private int bookId;
+    private String userName;
 
     /**
-     * Constructor mặc định cho ReadBookEntity.
-     * Khởi tạo đối tượng ReadBookEntity mà không cần thông tin đầu vào.
+     * Khởi tạo một đối tượng ReadBookEntity mặc định.
      */
     public ReadBookEntity() {}
 
     /**
-     * Constructor cho ReadBookEntity với các thông tin chi tiết.
-     * 
-     * @param readId    ID của việc đọc sách, kế thừa từ lớp BaseEntity.
-     * @param bookId    ID của sách đã đọc.
-     * @param userName  Tên người dùng đã đọc sách.
+     * Khởi tạo một đối tượng ReadBookEntity với các thông tin chi tiết.
+     *
+     * @param readId  ID của sách đã đọc
+     * @param bookId  ID của sách
+     * @param userName Tên người dùng
      */
     public ReadBookEntity(int readId, int bookId, String userName) {
-        super(readId);  // Gọi constructor của lớp cha (BaseEntity) để khởi tạo ID
+        super(readId);
         this.bookId = bookId;
         this.userName = userName;
     }
 
     /**
-     * Lấy ID của sách đã đọc.
-     * 
-     * @return ID của sách đã đọc.
+     * Lấy ID của sách.
+     *
+     * @return ID của sách
      */
     public int getBookId() {
         return bookId;
     }
 
     /**
-     * Đặt ID cho sách đã đọc.
-     * 
-     * @param bookId ID của sách mới.
+     * Thiết lập ID của sách.
+     *
+     * @param bookId ID của sách
      */
     public void setBookId(int bookId) {
         this.bookId = bookId;
     }
 
     /**
-     * Lấy tên người dùng đã đọc sách.
-     * 
-     * @return Tên người dùng.
+     * Lấy tên người dùng.
+     *
+     * @return Tên người dùng
      */
     public String getUserName() {
         return userName;
     }
 
     /**
-     * Đặt tên người dùng đã đọc sách.
-     * 
-     * @param userName Tên người dùng mới.
+     * Thiết lập tên người dùng.
+     *
+     * @param userName Tên người dùng
      */
     public void setUserName(String userName) {
         this.userName = userName;

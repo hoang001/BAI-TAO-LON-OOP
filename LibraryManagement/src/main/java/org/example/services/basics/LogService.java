@@ -27,7 +27,7 @@ public class LogService {
 
     public LogService() {
         this.logDao = new LogDaoImpl();
-        this.userService = new UserService();
+        this.userService = UserService.getInstance();
         this.executorService = Executors.newFixedThreadPool(4); // Sử dụng thread pool cố định với 4 luồng
     }
     
@@ -36,9 +36,6 @@ public class LogService {
      */
     public List<LogEntity> getAllLogs() {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập để lấy tất cả các log");
-            }
             if (!userService.getLoginUser().getRole().equals(Roles.ADMIN) || !userService.getLoginUser().getRole().equals(Roles.LIBRARIAN)) {
                 throw new SecurityException("Bạn không có quyền");
             }
@@ -60,6 +57,14 @@ public class LogService {
         } catch (TimeoutException e) {
             System.out.println("Thời gian chờ quá lâu khi lấy tất cả các log: " + e.getMessage());
             return null;
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
+            System.out.println("Lỗi: " + e.getMessage());
+            return null;
+
+        } catch(SecurityException e) {
+            System.out.println("Lỗi: " + e.getMessage());
+            return null;
         }
     }
     
@@ -70,9 +75,6 @@ public class LogService {
      */
     public LogEntity getLogById(int logId) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập để lấy log theo ID");
-            }
             if (!userService.getLoginUser().getRole().equals(Roles.ADMIN) || !userService.getLoginUser().getRole().equals(Roles.LIBRARIAN)) {
                 throw new SecurityException("Bạn không có quyền");
             }
@@ -94,6 +96,14 @@ public class LogService {
         } catch (TimeoutException e) {
             System.out.println("Thời gian chờ quá lâu khi lấy log theo ID: " + e.getMessage());
             return null;
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
+            System.out.println("Lỗi: " + e.getMessage());
+            return null;
+
+        } catch(SecurityException e) {
+            System.out.println("Lỗi" + e.getMessage());
+            return null;
         }
     }
     
@@ -104,9 +114,6 @@ public class LogService {
      */
     public List<LogEntity> getLogsByUserName(String userName) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập để lấy log theo userName");
-            }
     
             // Truy vấn log theo tên người dùng bằng luồng riêng
             Future<List<LogEntity>> futureLogs = executorService.submit(() -> {
@@ -125,6 +132,11 @@ public class LogService {
         } catch (TimeoutException e) {
             System.out.println("Thời gian chờ quá lâu khi lấy log theo userName: " + e.getMessage());
             return null;
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
+            System.out.println("Lỗi: " + e.getMessage());
+            return null;
+
         }
     }
     
@@ -136,9 +148,6 @@ public class LogService {
      */
     public List<LogEntity> getLogsByTimeRange(LocalDateTime startDate, LocalDateTime endDate) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalStateException("Bạn cần đăng nhập để lấy log theo thời gian");
-            }
     
             // Truy vấn log theo khoảng thời gian bằng luồng riêng
             Future<List<LogEntity>> futureLogs = executorService.submit(() -> {
@@ -157,6 +166,11 @@ public class LogService {
         } catch (TimeoutException e) {
             System.out.println("Thời gian chờ quá lâu khi lấy log theo thời gian: " + e.getMessage());
             return null;
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
+            System.out.println("Lỗi: " + e.getMessage());
+            return null;
+
         }
     }
 }    

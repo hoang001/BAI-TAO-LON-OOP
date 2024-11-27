@@ -38,7 +38,7 @@ public class BookService {
 
     public BookService() {
         this.bookDao = new BookDaoImpl();
-        this.userService = new UserService();
+        this.userService = UserService.getInstance();
         this.logDao = new LogDaoImpl();
         this.executorService = Executors.newFixedThreadPool(4); // Tạo thread pool với 4 luồng
     }
@@ -46,14 +46,11 @@ public class BookService {
     /**
      * Thêm một cuốn sách mới vào hệ thống và cập nhật trạng thái của sách.
      *
-     * @param BookEntity Thông tin cuốn sách cần thêm.
+     * @param bookEntity Thông tin cuốn sách cần thêm.
      * @return True nếu thêm sách thành công, ngược lại False.
      */
     public boolean addBook(BookEntity bookEntity) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi thêm sách");
-            }
             // Kiểm tra quyền người dùng
             if (!userService.getLoginUser().getRole().equals(Roles.ADMIN) && !userService.getLoginUser().getRole().equals(Roles.LIBRARIAN)) {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Không có quyền thêm sách"));
@@ -116,9 +113,6 @@ public class BookService {
      */
     public boolean deleteBookByIsbn(String isbn) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi xóa sách");
-            }
             // Kiểm tra quyền người dùng
             if (!userService.getLoginUser().getRole().equals(Roles.ADMIN) && !userService.getLoginUser().getRole().equals(Roles.LIBRARIAN)) {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Không có quyền xóa sách"));
@@ -190,9 +184,6 @@ public class BookService {
      */
     public boolean deleteBookById(int bookId) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi xóa sách");
-            }
             // Kiểm tra quyền người dùng
             if (!userService.getLoginUser().getRole().equals(Roles.ADMIN) && !userService.getLoginUser().getRole().equals(Roles.LIBRARIAN)) {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Không có quyền xóa sách"));
@@ -249,14 +240,11 @@ public class BookService {
     /**
      * Cập nhật thông tin của một cuốn sách.
      *
-     * @param BookEntity Thông tin cuốn sách cần cập nhật.
+     * @param book Thông tin cuốn sách cần cập nhật.
      * @return True nếu cập nhật thành công, ngược lại False.
      */
     public boolean updateBook(BookEntity book) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi cập nhật sách");
-            }
             // Kiểm tra quyền người dùng
             if (!userService.getLoginUser().getRole().equals(Roles.ADMIN) && !userService.getLoginUser().getRole().equals(Roles.LIBRARIAN)) {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Không có quyền cập nhật sách"));
@@ -302,6 +290,10 @@ public class BookService {
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
+            System.out.println("Lỗi: " + e.getMessage());
+            return false;
         } catch (SecurityException e) {
             System.out.println("Lỗi bảo mật: " + e.getMessage());
             try {
@@ -326,9 +318,6 @@ public class BookService {
      */
     public boolean addBookQuantity(String isbn, int quantity) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi thêm sách");
-            }
             if (!userService.getLoginUser().getRole().equals(Roles.ADMIN) && !userService.getLoginUser().getRole().equals(Roles.LIBRARIAN)) {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Không có quyền thêm sách"));
                 throw new SecurityException("Bạn không có quyền");
@@ -359,6 +348,10 @@ public class BookService {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Cập nhật số lượng sách thất bại với ISBN: " + isbn));
                 return false;
             }
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
+            System.out.println("Lỗi: " + e.getMessage());
+            return false;
         } catch (SecurityException e) {
             System.out.println("Lỗi bảo mật: " + e.getMessage());
             try {
@@ -412,9 +405,6 @@ public class BookService {
      */
     public BookEntity getBookById(int bookId) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi xem sách");
-            }
             // Tìm sách theo ID
             Future<BookEntity> future = executorService.submit(() -> bookDao.findBookById(bookId));
             try {
@@ -436,13 +426,9 @@ public class BookService {
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
             System.out.println("Lỗi: " + e.getMessage());
-            try {
-                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi đăng nhập: " + e.getMessage()));
-            } catch (SQLException logException) {
-                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
-            }
         }
         return null;
     }
@@ -457,9 +443,6 @@ public class BookService {
      */
     public BookEntity getBookByIsbn(String isbn) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi xem sách");
-            }
             // Tìm sách theo ISBN
             Future<BookEntity> futureBooks = executorService.submit(() -> bookDao.findBookByIsbn(isbn));
             try {
@@ -481,13 +464,9 @@ public class BookService {
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
-        } catch (IllegalArgumentException e) { 
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
             System.out.println("Lỗi: " + e.getMessage());
-            try {
-                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi đăng nhập: " + e.getMessage()));
-            } catch (SQLException logException) {
-                System.out.println("Lỗi khi ghi log: " + logException.getMessage());
-            }
         }
         return null;
     }    
@@ -500,9 +479,6 @@ public class BookService {
      */
     public List<BookEntity> getBooksByTitle(String title) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi xem sách");
-            }
             // Tìm sách theo tiêu đề
             Future<List<BookEntity>> futureBooks = executorService.submit(() -> bookDao.findBooksByTitle(title));
             List<BookEntity> bookEntities = futureBooks.get(); // Chờ kết quả
@@ -528,7 +504,8 @@ public class BookService {
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
-        } catch (IllegalArgumentException e) { 
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
             System.out.println("Lỗi: " + e.getMessage());
         }
         return Collections.emptyList();
@@ -543,22 +520,33 @@ public class BookService {
      */
     public List<BookEntity> getBooksByAuthor(String authorName) {
         try {
+            // Kiểm tra người dùng đã đăng nhập
             if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi xem sách");
+                throw new IllegalStateException("Bạn cần đăng nhập trước khi tìm sách.");
             }
+
+            // Thêm ký tự wildcard cho tên tác giả
+            String searchAuthorName = "%" + authorName + "%";
+
             // Tìm sách theo tác giả
-            Future<List<BookEntity>> futureBooks = executorService.submit(() -> bookDao.findBooksByAuthor(authorName));
+            Future<List<BookEntity>> futureBooks = executorService.submit(
+                () -> bookDao.findBooksByAuthor(searchAuthorName));
             List<BookEntity> bookEntities = futureBooks.get(); // Chờ kết quả
-            if (bookEntities != null) {
+
+            if (bookEntities != null && !bookEntities.isEmpty()) {
                 try {
-                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Tìm thấy sách của tác giả: " + authorName));
+                    logDao.addLog(
+                        new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(),
+                            "Tìm thấy sách của tác giả: " + authorName));
                 } catch (SQLException logException) {
                     System.out.println("Lỗi khi ghi log: " + logException.getMessage());
                 }
                 return bookEntities.stream().collect(Collectors.toList());
             } else {
                 try {
-                    logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Không tìm thấy sách của tác giả: " + authorName));
+                    logDao.addLog(
+                        new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(),
+                            "Không tìm thấy sách của tác giả: " + authorName));
                 } catch (SQLException logException) {
                     System.out.println("Lỗi khi ghi log: " + logException.getMessage());
                 }
@@ -567,16 +555,19 @@ public class BookService {
         } catch (InterruptedException | ExecutionException e) {
             System.out.println("Lỗi: " + e.getMessage());
             try {
-                logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Lỗi khi tìm sách: " + e.getMessage()));
+                logDao.addLog(
+                    new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(),
+                        "Lỗi khi tìm sách: " + e.getMessage()));
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
-        } catch (IllegalArgumentException e) { 
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
             System.out.println("Lỗi: " + e.getMessage());
         }
         return Collections.emptyList();
     }
-    
+
 
     /**
      * Tìm sách theo thể loại.
@@ -586,13 +577,19 @@ public class BookService {
      */
     public List<BookEntity> getBooksByGenre(String genre) {
         try {
+            // Kiểm tra người dùng đã đăng nhập
             if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi xem sách");
+                throw new IllegalStateException("Bạn cần đăng nhập trước khi tìm sách.");
             }
+
+            // Thêm ký tự wildcard cho thể loại
+            String searchGenre = "%" + genre + "%";
+
             // Tìm sách theo thể loại
-            Future<List<BookEntity>> futureBooks = executorService.submit(() -> bookDao.findBooksByGenre(genre));
+            Future<List<BookEntity>> futureBooks = executorService.submit(() -> bookDao.findBooksByGenre(searchGenre));
             List<BookEntity> bookEntities = futureBooks.get(); // Chờ kết quả
-            if (bookEntities != null) {
+
+            if (bookEntities != null && !bookEntities.isEmpty()) {
                 try {
                     logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Tìm thấy sách với thể loại: " + genre));
                 } catch (SQLException logException) {
@@ -614,7 +611,8 @@ public class BookService {
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
-        } catch (IllegalArgumentException e) { 
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
             System.out.println("Lỗi: " + e.getMessage());
         }
         return Collections.emptyList();
@@ -628,13 +626,14 @@ public class BookService {
      */
     public List<BookEntity> getBooksByPublisher(String publisherName) {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi xem sách");
-            }
+            // Thêm ký tự wildcard cho tên nhà xuất bản
+            String searchPublisherName = "%" + publisherName + "%";
+
             // Tìm sách theo nhà xuất bản
-            Future<List<BookEntity>> futureBooks = executorService.submit(() -> bookDao.findBooksByPublisher(publisherName));
+            Future<List<BookEntity>> futureBooks = executorService.submit(() -> bookDao.findBooksByPublisher(searchPublisherName));
             List<BookEntity> bookEntities = futureBooks.get(); // Chờ kết quả
-            if (bookEntities != null) {
+
+            if (bookEntities != null && !bookEntities.isEmpty()) {
                 try {
                     logDao.addLog(new LogEntity(LocalDateTime.now(), userService.getLoginUser().getUserName(), "Tìm thấy sách của nhà xuất bản: " + publisherName));
                 } catch (SQLException logException) {
@@ -656,12 +655,13 @@ public class BookService {
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
-        } catch (IllegalArgumentException e) { 
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
             System.out.println("Lỗi: " + e.getMessage());
         }
         return Collections.emptyList();
     }
-    
+
 
     /**
      * Lấy tất cả các cuốn sách.
@@ -670,9 +670,6 @@ public class BookService {
      */
     public List<BookEntity> getAllBooks() {
         try {
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi xem sách");
-            }
             // Lấy tất cả sách
             Future<List<BookEntity>> futureBooks = executorService.submit(() -> bookDao.findAllBooks());
             List<BookEntity> bookEntities = futureBooks.get(); // Chờ kết quả
@@ -698,13 +695,18 @@ public class BookService {
             } catch (SQLException logException) {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) { 
+        } catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
             System.out.println("Lỗi: " + e.getMessage());
         }
         return Collections.emptyList();
-    }    
+    }
 
+    /**
+     *
+     * @param isbn
+     * @return
+     */
     public boolean isBookInDatabase(String isbn) {
         try {
             return bookDao.isBookInDatabase(isbn);
@@ -713,5 +715,4 @@ public class BookService {
             return false;
         }
     }
-    
 }

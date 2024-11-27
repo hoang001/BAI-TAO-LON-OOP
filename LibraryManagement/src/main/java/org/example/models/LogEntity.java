@@ -3,28 +3,24 @@ package org.example.models;
 import java.time.LocalDateTime;
 
 /**
- * Lớp này đại diện cho thực thể nhật ký, lưu trữ thông tin về hành động của người dùng.
- * Nó mở rộng từ lớp BaseEntity để kế thừa thuộc tính ID.
+ * Lớp đại diện cho log hành động của người dùng.
  */
 public class LogEntity extends BaseEntity {
-    
-    // Thuộc tính của lớp LogEntity
-    private LocalDateTime timeStamp;   // Thời gian thực hiện hành động
-    private String userName;           // Tên người dùng thực hiện hành động
-    private String actionDetails;      // Chi tiết hành động
+    private LocalDateTime timeStamp;
+    private String userName;
+    private String actionDetails;
 
     /**
-     * Constructor mặc định cho LogEntity.
-     * Khởi tạo đối tượng LogEntity mà không cần thông tin đầu vào.
+     * Khởi tạo một đối tượng LogEntity mặc định.
      */
     public LogEntity() {}
 
     /**
-     * Constructor cho LogEntity với các thông tin chi tiết.
+     * Khởi tạo một đối tượng LogEntity với các thông tin chi tiết.
      *
-     * @param timeStamp     Thời điểm diễn ra hành động.
-     * @param userName      Tên người dùng thực hiện hành động.
-     * @param actionDetails Chi tiết hành động thực hiện.
+     * @param timeStamp      Thời gian xảy ra hành động
+     * @param userName       Tên người dùng thực hiện hành động
+     * @param actionDetails  Chi tiết hành động
      */
     public LogEntity(LocalDateTime timeStamp, String userName, String actionDetails) {
         this.timeStamp = timeStamp;
@@ -33,18 +29,18 @@ public class LogEntity extends BaseEntity {
     }
 
     /**
-     * Lấy thời điểm diễn ra hành động.
-     * 
-     * @return Thời gian của hành động dưới dạng LocalDateTime.
+     * Lấy thời gian xảy ra hành động.
+     *
+     * @return Thời gian xảy ra hành động
      */
     public LocalDateTime getTimeStamp() {
         return timeStamp;
     }
 
     /**
-     * Đặt thời điểm diễn ra hành động.
-     * 
-     * @param timeStamp Thời gian của hành động dưới dạng LocalDateTime.
+     * Thiết lập thời gian xảy ra hành động.
+     *
+     * @param timeStamp Thời gian xảy ra hành động
      */
     public void setTimeStamp(LocalDateTime timeStamp) {
         this.timeStamp = timeStamp;
@@ -52,35 +48,35 @@ public class LogEntity extends BaseEntity {
 
     /**
      * Lấy tên người dùng thực hiện hành động.
-     * 
-     * @return Tên người dùng thực hiện hành động.
+     *
+     * @return Tên người dùng thực hiện hành động
      */
     public String getUserName() {
         return userName;
     }
 
     /**
-     * Đặt tên người dùng thực hiện hành động.
-     * 
-     * @param userName Tên người dùng cần thiết lập.
+     * Thiết lập tên người dùng thực hiện hành động.
+     *
+     * @param userName Tên người dùng thực hiện hành động
      */
     public void setUserName(String userName) {
         this.userName = userName;
     }
 
     /**
-     * Lấy chi tiết hành động thực hiện.
-     * 
-     * @return Chi tiết hành động.
+     * Lấy chi tiết hành động.
+     *
+     * @return Chi tiết hành động
      */
     public String getActionDetails() {
         return actionDetails;
     }
 
     /**
-     * Đặt chi tiết hành động thực hiện.
-     * 
-     * @param actionDetails Chi tiết hành động cần thiết lập.
+     * Thiết lập chi tiết hành động.
+     *
+     * @param actionDetails Chi tiết hành động
      */
     public void setActionDetails(String actionDetails) {
         this.actionDetails = actionDetails;

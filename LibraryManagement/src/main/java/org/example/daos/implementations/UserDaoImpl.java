@@ -4,129 +4,157 @@ import org.example.daos.interfaces.UserDao;
 import org.example.models.UserEntity;
 import org.example.models.UserEntity.Roles;
 import org.example.utils.DatabaseConnection;
-import org.mindrot.jbcrypt.BCrypt;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
+import java.util.Base64;
 
 /**
- * Cài đặt giao diện UserDAO để thực hiện các thao tác với cơ sở dữ liệu.
+ * Lớp triển khai UserDao để thao tác với cơ sở dữ liệu.
  */
 public class UserDaoImpl implements UserDao {
+
     private final Connection connection;
 
-    // Constructor để khởi tạo kết nối cơ sở dữ liệu
+    /**
+     * Khởi tạo một đối tượng UserDaoImpl.
+     */
     public UserDaoImpl() {
         this.connection = DatabaseConnection.getConnection();
     }
 
     /**
-     * Đăng ký người dùng mới trong cơ sở dữ liệu.
-     * 
-     * @param user đối tượng UserEntity chứa thông tin người dùng.
-     * @return true nếu đăng ký thành công, false nếu không thành công.
-     * @throws SQLException khi xảy ra lỗi trong quá trình kết nối hoặc truy vấn cơ sở dữ liệu.
+     * Hàm băm mật khẩu dạng plain text sử dụng thuật toán SHA-256.
+     *
+     * @param password mật khẩu plain text cần được băm.
+     * @return mật khẩu đã băm dưới dạng chuỗi được mã hóa Base64.
+     * @throws NoSuchAlgorithmException nếu thuật toán SHA-256 không khả dụng.
+     */
+    private String hashPassword(String password) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] hashedBytes = md.digest(password.getBytes());
+        return Base64.getEncoder().encodeToString(hashedBytes);
+    }
+
+    /**
+     * @param password
+     * @param hashedPassword
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    private boolean verifyPassword(String password, String hashedPassword)
+            throws NoSuchAlgorithmException {
+        String hashedInputPassword = hashPassword(password);
+        return hashedInputPassword.equals(hashedPassword);
+    }
+
+    /**
+     * @param user Đối tượng UserEntity chứa thông tin người dùng cần đăng ký.
+     * @return true nếu tạo tài khoản thành công, ngược lại trả về false.
+     * @throws SQLException nếu có lỗi trong quá trình thao tác với cơ sở dữ liệu.
      */
     @Override
     public boolean registerUser(UserEntity user) throws SQLException {
-        // Mã hóa mật khẩu trước khi lưu vào cơ sở dữ liệu
-        String hashedPassword = BCrypt.hashpw(user.getPasswordHash(), BCrypt.gensalt());
+        try {
+            String hashedPassword = hashPassword(user.getPasswordHash()); // Hash mật khẩu
 
-        String sql = "INSERT INTO Users (Username, PasswordHash, Email, FirstName, LastName, PhoneNumber, ProfileImageDirectory, Role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, user.getUserName());
-            preparedStatement.setString(2, hashedPassword);  // Lưu mật khẩu đã mã hóa
-            preparedStatement.setString(3, user.getEmail());
-            preparedStatement.setString(4, user.getFirstName());
-            preparedStatement.setString(5, user.getLastName());
-            preparedStatement.setString(6, user.getPhoneNumber());
-            preparedStatement.setString(7, user.getProfileImageDirectory());
-            preparedStatement.setString(8, user.getRole().name());  // Lưu vai trò người dùng (Role)
-            int result = preparedStatement.executeUpdate();
-            return result > 0;
+            String sql = "INSERT INTO Users (Username, PasswordHash, Email, FirstName, LastName, PhoneNumber, ProfileImageDirectory, Role) "
+                    +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, user.getUserName());
+                preparedStatement.setString(2, hashedPassword);
+                preparedStatement.setString(3, user.getEmail());
+                preparedStatement.setString(4, user.getFirstName());
+                preparedStatement.setString(5, user.getLastName());
+                preparedStatement.setString(6, user.getPhoneNumber());
+                preparedStatement.setString(7, user.getProfileImageDirectory());
+                preparedStatement.setString(8, user.getRole().name());
+                return preparedStatement.executeUpdate() > 0;
+            }
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Không tìm thấy thuật toán hash", e);
         }
     }
 
     /**
-     * Đăng nhập người dùng bằng tên người dùng và mật khẩu.
-     * 
-     * @param userName tên người dùng.
-     * @param password mật khẩu của người dùng.
-     * @return đối tượng UserEntity nếu đăng nhập thành công, null nếu không tìm thấy người dùng.
-     * @throws SQLException khi xảy ra lỗi trong quá trình truy vấn cơ sở dữ liệu.
+     * @param userName Tên đăng nhập của người dùng.
+     * @param password Mật khẩu của người dùng.
+     * @return Đối tượng đã đăng nhập, ngược lại trả về null.
+     * @throws SQLException nếu có lỗi trong quá trình thao tác với cơ sở dữ liệu.
      */
     @Override
     public UserEntity loginUser(String userName, String password) throws SQLException {
-        String sql = "SELECT * FROM Users WHERE userName = ?";
+        String sql = "SELECT * FROM Users WHERE Username = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, userName);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                String storedPasswordHash = resultSet.getString("PasswordHash");
-                // Kiểm tra mật khẩu người dùng nhập vào có khớp với mật khẩu đã mã hóa trong cơ sở dữ liệu
-                if (BCrypt.checkpw(password, storedPasswordHash)) {
-                    return new UserEntity(
-                            resultSet.getInt("UserID"),
-                            resultSet.getString("Username"),
-                            resultSet.getString("PasswordHash"),
-                            resultSet.getString("Email"),
-                            resultSet.getString("FirstName"),
-                            resultSet.getString("LastName"),
-                            resultSet.getString("PhoneNumber"),
-                            resultSet.getString("ProfileImageDirectory"),
-                            Roles.valueOf(resultSet.getString("Role"))
-                    );
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String storedPasswordHash = resultSet.getString("PasswordHash");
+
+                    if (verifyPassword(password, storedPasswordHash)) {
+                        return new UserEntity(
+                                resultSet.getInt("UserID"),
+                                resultSet.getString("Username"),
+                                resultSet.getString("PasswordHash"),
+                                resultSet.getString("Email"),
+                                resultSet.getString("FirstName"),
+                                resultSet.getString("LastName"),
+                                resultSet.getString("PhoneNumber"),
+                                resultSet.getString("ProfileImageDirectory"),
+                                Roles.valueOf(resultSet.getString("Role")));
+                    }
                 }
             }
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Không tìm thấy thuật toán hash", e);
         }
         return null;
     }
 
     /**
-     * Thay đổi mật khẩu của người dùng.
-     * 
-     * @param userId    ID của người dùng.
-     * @param newPassword mật khẩu mới.
-     * @return true nếu thay đổi mật khẩu thành công, false nếu không thành công.
-     * @throws SQLException khi xảy ra lỗi trong quá trình cập nhật cơ sở dữ liệu.
+     * @param userId      ID của người dùng.
+     * @param newPassword Mật khẩu mới của người dùng.
+     * @return true nếu thay đổi mật khẩu thành công, ngược lại trả về false.
+     * @throws SQLException nếu có lỗi trong quá trình thao tác với cơ sở dữ liệu.
      */
     @Override
     public boolean changePassword(int userId, String newPassword) throws SQLException {
-        String newHashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
-        String sql = "UPDATE Users SET passwordHash = ? WHERE userId = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, newHashedPassword);
-            preparedStatement.setInt(2, userId);
-            int result = preparedStatement.executeUpdate();
-            return result > 0;
+        try {
+            String newHashedPassword = hashPassword(newPassword);
+            String sql = "UPDATE Users SET PasswordHash = ? WHERE UserID = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, newHashedPassword);
+                preparedStatement.setInt(2, userId);
+                return preparedStatement.executeUpdate() > 0;
+            }
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Không tìm thấy thuật toán hash", e);
         }
     }
 
     /**
-     * Cập nhật email của người dùng.
-     * 
-     * @param userId    ID của người dùng.
-     * @param newEmail email mới.
-     * @return true nếu cập nhật email thành công, false nếu không thành công.
-     * @throws SQLException khi xảy ra lỗi trong quá trình cập nhật cơ sở dữ liệu.
+     * @param userId   ID của người dùng.
+     * @param newEmail Email mới của người dùng.
+     * @return true nếu cập nhật email thành công, ngược lại trả về false.
+     * @throws SQLException nếu có lỗi trong quá trình thao tác với cơ sở dữ liệu.
      */
     @Override
     public boolean updateEmail(int userId, String newEmail) throws SQLException {
-        String sql = "UPDATE Users SET email = ? WHERE userId = ?";
+        String sql = "UPDATE Users SET Email = ? WHERE UserID = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, newEmail);
             preparedStatement.setInt(2, userId);
-            int result = preparedStatement.executeUpdate();
-            return result > 0;
+            return preparedStatement.executeUpdate() > 0;
         }
     }
 
     /**
-     * Cập nhật số điện thoại của người dùng.
-     * 
-     * @param userId        ID của người dùng.
-     * @param newPhoneNumber số điện thoại mới.
-     * @return true nếu cập nhật số điện thoại thành công, false nếu không thành công.
-     * @throws SQLException khi xảy ra lỗi trong quá trình cập nhật cơ sở dữ liệu.
+     * @param userId         ID của người dùng.
+     * @param newPhoneNumber Số điện thoại mới của người dùng.
+     * @return true nếu cập nhật số điện thoại thành công, ngược lại trả về false.
+     * @throws SQLException nếu có lỗi trong quá trình thao tác với cơ sở dữ liệu.
      */
     @Override
     public boolean updatePhoneNumber(int userId, String newPhoneNumber) throws SQLException {
@@ -140,15 +168,14 @@ public class UserDaoImpl implements UserDao {
     }
 
     /**
-     * Cập nhật hình ảnh đại diện của người dùng.
-     * 
-     * @param userId              ID của người dùng.
-     * @param newProfileImageDirectory đường dẫn mới tới hình ảnh đại diện.
-     * @return true nếu cập nhật hình ảnh thành công, false nếu không thành công.
-     * @throws SQLException khi xảy ra lỗi trong quá trình cập nhật cơ sở dữ liệu.
+     * @param userId                   ID của người dùng.
+     * @param newProfileImageDirectory Đường dẫn ảnh đại diện mới của người dùng.
+     * @return true nếu cập nhật ảnh đại diện thành công, ngược lại trả về false.
+     * @throws SQLException nếu có lỗi trong quá trình thao tác với cơ sở dữ liệu.
      */
     @Override
-    public boolean updateProfileImage(int userId, String newProfileImageDirectory) throws SQLException {
+    public boolean updateProfileImage(int userId, String newProfileImageDirectory)
+            throws SQLException {
         String sql = "UPDATE Users SET profileImageDirectory = ? WHERE userId = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, newProfileImageDirectory);
@@ -159,11 +186,9 @@ public class UserDaoImpl implements UserDao {
     }
 
     /**
-     * Tìm thông tin người dùng từ cơ sở dữ liệu.
-     * 
-     * @param userId ID của người dùng cần lấy thông tin.
-     * @return đối tượng UserEntity chứa thông tin người dùng, null nếu không tìm thấy.
-     * @throws SQLException khi xảy ra lỗi trong quá trình truy vấn cơ sở dữ liệu.
+     * @param userId ID của người dùng.
+     * @return Đối tượng tương ứng với userId.
+     * @throws SQLException nếu có lỗi trong quá trình thao tác với cơ sở dữ liệu.
      */
     @Override
     public UserEntity findUserInfo(int userId) throws SQLException {
@@ -173,16 +198,15 @@ public class UserDaoImpl implements UserDao {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return new UserEntity(
-                        resultSet.getInt("UserID"),
-                        resultSet.getString("Username"),
-                        resultSet.getString("PasswordHash"),
-                        resultSet.getString("Email"),
-                        resultSet.getString("FirstName"),
-                        resultSet.getString("LastName"),
-                        resultSet.getString("PhoneNumber"),
-                        resultSet.getString("ProfileImageDirectory"),
-                        Roles.valueOf(resultSet.getString("Role"))
-                    );
+                            resultSet.getInt("UserID"),
+                            resultSet.getString("Username"),
+                            resultSet.getString("PasswordHash"),
+                            resultSet.getString("Email"),
+                            resultSet.getString("FirstName"),
+                            resultSet.getString("LastName"),
+                            resultSet.getString("PhoneNumber"),
+                            resultSet.getString("ProfileImageDirectory"),
+                            Roles.valueOf(resultSet.getString("Role")));
                 }
             }
         }
@@ -190,11 +214,9 @@ public class UserDaoImpl implements UserDao {
     }
 
     /**
-     * Kiểm tra xem tên người dùng có bị trùng không.
-     * 
-     * @param userName tên người dùng cần kiểm tra.
-     * @return true nếu tên người dùng đã tồn tại, false nếu không.
-     * @throws SQLException khi xảy ra lỗi trong quá trình truy vấn cơ sở dữ liệu.
+     * @param userName Tên người dùng cần kiểm tra.
+     * @return true nếu tên người dùng tồn tại, ngược lại trả về false.
+     * @throws SQLException nếu có lỗi trong quá trình thao tác với cơ sở dữ liệu.
      */
     @Override
     public boolean isUsernameTaken(String userName) throws SQLException {
@@ -211,11 +233,9 @@ public class UserDaoImpl implements UserDao {
     }
 
     /**
-     * Kiểm tra xem email có bị trùng không.
-     * 
-     * @param email email cần kiểm tra.
-     * @return true nếu email đã tồn tại, false nếu không.
-     * @throws SQLException khi xảy ra lỗi trong quá trình truy vấn cơ sở dữ liệu.
+     * @param email Email cần kiểm tra.
+     * @return true nếu email đã đăng kí, ngược lại trả về false.
+     * @throws SQLException nếu có lỗi trong quá trình thao tác với cơ sở dữ liệu.
      */
     @Override
     public boolean isEmailTaken(String email) throws SQLException {
@@ -232,11 +252,9 @@ public class UserDaoImpl implements UserDao {
     }
 
     /**
-     * Kiểm tra xem số điện thoại có bị trùng không.
-     * 
-     * @param phoneNumber số điện thoại cần kiểm tra.
-     * @return true nếu số điện thoại đã tồn tại, false nếu không.
-     * @throws SQLException khi xảy ra lỗi trong quá trình truy vấn cơ sở dữ liệu.
+     * @param phoneNumber Số điện thoại cần kiểm tra.
+     * @return true nếu số điện thoại đã đăng kí, ngược lại trả về false.
+     * @throws SQLException nếu có lỗi trong quá trình thao tác với cơ sở dữ liệu.
      */
     @Override
     public boolean isPhoneNumberTaken(String phoneNumber) throws SQLException {

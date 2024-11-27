@@ -1,7 +1,5 @@
 package org.example.services.basics;
 
-import org.example.daos.interfaces.UserDao;
-import org.example.daos.interfaces.LogDao;
 import org.example.daos.implementations.UserDaoImpl;
 import org.example.daos.implementations.LogDaoImpl;
 import org.example.models.UserEntity;
@@ -13,18 +11,34 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class UserService {
-    private final UserDao userDao;
-    private final LogDao logDao;
+    private static UserService instance;
+    private UserDaoImpl userDao;
+    private LogDaoImpl logDao;
+    private UserEntity loginUser;
 
-    public UserService() {
+    // Constructor riêng tư để ngăn chặn khởi tạo từ bên ngoài
+    private UserService() {
         this.userDao = new UserDaoImpl();
         this.logDao = new LogDaoImpl();
+        this.loginUser = null;
     }
 
-    private UserEntity loginUser = null;
+    // Phương thức trả về instance duy nhất của UserService
+    public static UserService getInstance() {
+        if (instance == null) {
+            instance = new UserService();
+        }
+        return instance;
+    }
 
+    // Phương thức trả về người dùng đang đăng nhập
     public UserEntity getLoginUser() {
         return loginUser;
+    }
+
+    // Phương thức thiết lập người dùng đang đăng nhập
+    public void setLoginUser(UserEntity loginUser) {
+        this.loginUser = loginUser;
     }
 
     /**
@@ -159,7 +173,7 @@ public class UserService {
             }
             
             // Kiểm tra mật khẩu mới hợp lệ
-            if (newPassword == null || newPassword.isEmpty()) {
+            if (newPassword == null || newPassword.trim().isEmpty()) {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Thay đổi mật khẩu thất bại: Chưa nhập đủ thông tin"));
                 throw new IllegalArgumentException("Chưa nhập đủ thông tin");
             }
@@ -175,15 +189,18 @@ public class UserService {
             }
             
             return result;
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
             // Ghi log khi gặp lỗi do điều kiện không hợp lệ (mật khẩu trống, chưa đăng nhập, ...)
+            System.out.println("Lỗi thay đổi mật khẩu: " + e.getMessage());
             try {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Thay đổi mật khẩu thất bại: " + e.getMessage()));
             } catch (SQLException logException) {
                 // Xử lý lỗi trong quá trình ghi log
                 System.out.println("Lỗi ghi log: " + logException.getMessage());
             }
-            System.out.println("Lỗi thay đổi mật khẩu: " + e.getMessage());
+            return false;
+        } catch (IllegalStateException e) {
+            System.out.println("Lỗi: " + e.getMessage());
             return false;
         } catch (SQLException e) {
             // Xử lý lỗi cơ sở dữ liệu trong quá trình thay đổi mật khẩu
@@ -211,7 +228,7 @@ public class UserService {
             }
     
             // Kiểm tra xem email mới có hợp lệ hay không
-            if (newEmail == null || newEmail.isEmpty()) {
+            if (newEmail == null || newEmail.trim().isEmpty()) {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Cập nhật email thất bại: Chưa nhập đủ thông tin"));
                 throw new IllegalArgumentException("Chưa nhập đủ thông tin");
             }
@@ -245,7 +262,7 @@ public class UserService {
             }
     
             return result;
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
             // Xử lý các ngoại lệ do người dùng nhập không hợp lệ (email không hợp lệ, thiếu thông tin, ...).
             try {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Cập nhật email thất bại: " + e.getMessage()));
@@ -254,6 +271,9 @@ public class UserService {
                 System.out.println("Lỗi ghi log: " + logException.getMessage());
             }
             System.out.println("Lỗi cập nhật email: " + e.getMessage());
+            return false;
+        } catch (IllegalStateException e) {
+            System.out.println("Lỗi: " + e.getMessage());
             return false;
         } catch (SQLException e) {
             // Xử lý lỗi cơ sở dữ liệu trong quá trình cập nhật email hoặc ghi log
@@ -281,7 +301,7 @@ public class UserService {
             }
     
             // Kiểm tra xem số điện thoại mới có hợp lệ hay không
-            if (newPhoneNumber == null || newPhoneNumber.isEmpty()) {
+            if (newPhoneNumber == null || newPhoneNumber.trim().isEmpty()) {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Cập nhật số điện thoại thất bại: Chưa nhập đủ thông tin"));
                 throw new IllegalArgumentException("Chưa nhập đủ thông tin");
             }
@@ -315,7 +335,7 @@ public class UserService {
             }
     
             return result;
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
             // Xử lý các lỗi liên quan đến nhập liệu không hợp lệ
             try {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Cập nhật số điện thoại thất bại: " + e.getMessage()));
@@ -323,7 +343,10 @@ public class UserService {
                 // Xử lý lỗi ghi log nếu có
                 System.out.println("Lỗi ghi log: " + logException.getMessage());
             }
-            System.out.println("Lỗi cập nhật số điện thoại: " + e.getMessage());
+            System.out.println("Lỗi: " + e.getMessage());
+            return false;
+        } catch (IllegalStateException e) {
+            System.out.println("Lỗi: " + e.getMessage());
             return false;
         } catch (SQLException e) {
             // Xử lý lỗi trong cơ sở dữ liệu (cập nhật số điện thoại hoặc ghi log)
@@ -351,7 +374,7 @@ public class UserService {
             }
     
             // Kiểm tra xem đường dẫn ảnh có hợp lệ hay không
-            if (newProfileImageDirectory == null || newProfileImageDirectory.isEmpty()) {
+            if (newProfileImageDirectory == null || newProfileImageDirectory.trim().isEmpty()) {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Cập nhật ảnh đại diện thất bại: Chưa nhập đủ thông tin"));
                 throw new IllegalArgumentException("Chưa nhập đủ thông tin");
             }
@@ -368,7 +391,7 @@ public class UserService {
     
             return result;
     
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
             // Xử lý các lỗi liên quan đến nhập liệu không hợp lệ
             try {
                 logDao.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Cập nhật ảnh đại diện thất bại: " + e.getMessage()));
@@ -377,6 +400,9 @@ public class UserService {
                 System.out.println("Lỗi ghi log: " + logException.getMessage());
             }
             System.out.println("Lỗi cập nhật ảnh đại diện: " + e.getMessage());
+            return false;
+        } catch (IllegalStateException e) {
+            System.out.println("Lỗi: " + e.getMessage());
             return false;
         } catch (SQLException e) {
             // Xử lý lỗi trong cơ sở dữ liệu (cập nhật ảnh đại diện hoặc ghi log)
@@ -411,13 +437,7 @@ public class UserService {
     
         } catch (IllegalStateException e) {
             // Ghi log thất bại khi người dùng chưa đăng nhập
-            try {
-                logDao.addLog(new LogEntity(LocalDateTime.now(), loginUser.getUserName(), "Xem thông tin tài khoản thất bại: " + e.getMessage()));
-            } catch (SQLException logException) {
-                // Xử lý ngoại lệ ghi log nếu có
-                System.out.println("Lỗi ghi log: " + logException.getMessage());
-            }
-            System.out.println("Lỗi lấy thông tin tài khoản: " + e.getMessage());
+            System.out.println("Lỗi: " + e.getMessage());
             return null;
     
         } catch (SQLException e) {

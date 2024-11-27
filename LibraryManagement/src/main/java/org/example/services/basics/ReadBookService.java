@@ -35,7 +35,7 @@ public class ReadBookService {
 
     public ReadBookService() {
         this.readBookDao = new ReadBookDAOImpl();
-        this.userService = new UserService();
+        this.userService = UserService.getInstance();
         this.logDao = new LogDaoImpl();
         this.executorService = Executors.newFixedThreadPool(4); // Sử dụng thread pool cố định với 4 luồng
     }
@@ -48,10 +48,6 @@ public class ReadBookService {
      */
     public boolean markAsRead(int bookId) {
         try {
-            // Kiểm tra xem người dùng đã đăng nhập chưa
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi đánh dấu sách đã đọc");
-            }
     
             // Kiểm tra giá trị đầu vào
             if (bookId <= 0) {
@@ -87,6 +83,11 @@ public class ReadBookService {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
             return false;
+        }  catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
+            System.out.println("Lỗi: " + e.getMessage());
+            return false;
+
         } catch (SQLException logException) {
             System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             return false;
@@ -103,10 +104,6 @@ public class ReadBookService {
      */
     public List<ReadBookEntity> getReadBooksByUser() {
         try {
-            // Kiểm tra xem người dùng đã đăng nhập chưa
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi lấy danh sách sách đã đọc");
-            }
 
             // Truy vấn danh sách sách đã đọc bằng luồng riêng
             Future<List<ReadBookEntity>> future = executorService.submit(() -> {
@@ -126,6 +123,10 @@ public class ReadBookService {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
             return null;
+        }  catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
+            System.out.println("Lỗi: " + e.getMessage());
+            return null;
         }
     }
 
@@ -137,10 +138,6 @@ public class ReadBookService {
      */
     public boolean isBookRead(int bookId) {
         try {
-            // Kiểm tra xem người dùng đã đăng nhập chưa
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi kiểm tra sách đã đánh dấu sách đã đọc hay chưa");
-            }
 
             // Kiểm tra giá trị đầu vào
             if (bookId <= 0) {
@@ -170,6 +167,11 @@ public class ReadBookService {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
             return false;
+        }  catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
+            System.out.println("Lỗi: " + e.getMessage());
+            return false;
+
         } catch (SQLException logException) {
             System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             return false;
@@ -184,10 +186,6 @@ public class ReadBookService {
      */
     public boolean unmarkAsRead(int bookId) {
         try {
-            // Kiểm tra xem người dùng đã đăng nhập chưa
-            if (userService.getLoginUser() == null) {
-                throw new IllegalArgumentException("Bạn cần đăng nhập trước khi xóa đánh dấu sách đã đọc");
-            }
 
             // Kiểm tra giá trị đầu vào
             if (bookId <= 0) {
@@ -219,7 +217,12 @@ public class ReadBookService {
                 System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             }
             return false;
-        }  catch (SQLException logException) {
+        }   catch (IllegalStateException e) {
+            // Ghi log thất bại khi người dùng chưa đăng nhập
+            System.out.println("Lỗi: " + e.getMessage());
+            return false;
+
+        } catch (SQLException logException) {
             System.out.println("Lỗi khi ghi log: " + logException.getMessage());
             return false;
         }

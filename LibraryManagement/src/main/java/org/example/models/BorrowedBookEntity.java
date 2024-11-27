@@ -1,36 +1,34 @@
 package org.example.models;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
- * Lớp này đại diện cho thực thể sách đã mượn, lưu trữ thông tin về việc mượn sách của người dùng.
- * Nó mở rộng từ lớp BaseEntity để kế thừa thuộc tính ID.
+ * Lớp đại diện cho sách được mượn bởi người dùng.
  */
 public class BorrowedBookEntity extends BaseEntity {
 
-    // Thuộc tính của lớp BorrowedBookEntity
-    private int bookId;               // ID của sách đã mượn
-    private String userName;          // Tên người dùng mượn sách
-    private LocalDateTime borrowDate; // Ngày mượn sách
-    private LocalDateTime returnDate; // Ngày trả sách
+    private int bookId;
+    private String userName;
+    private LocalDate borrowDate;
+    private LocalDate returnDate;
 
     /**
-     * Constructor mặc định cho BorrowedBookEntity.
-     * Khởi tạo đối tượng BorrowedBookEntity mà không cần thông tin đầu vào.
+     * Khởi tạo một đối tượng BorrowedBookEntity mặc định.
      */
     public BorrowedBookEntity() {}
 
     /**
-     * Constructor cho BorrowedBookEntity với các thông tin chi tiết.
+     * Khởi tạo một đối tượng BorrowedBookEntity với các thông tin chi tiết.
      *
-     * @param borrowId     ID của việc mượn sách.
-     * @param bookId       ID của sách mượn.
-     * @param userName     Tên người dùng mượn sách.
-     * @param borrowDate   Ngày mượn sách.
-     * @param returnDate   Ngày trả sách.
+     * @param borrowId  ID của mượn sách
+     * @param bookId    ID của sách
+     * @param userName  Tên người dùng mượn sách
+     * @param borrowDate Ngày mượn sách
+     * @param returnDate Ngày trả sách
      */
-    public BorrowedBookEntity(int borrowId, int bookId, String userName, LocalDateTime borrowDate, LocalDateTime returnDate) {
-        super(borrowId);  // Gọi constructor của lớp cha BaseEntity để thiết lập ID
+    public BorrowedBookEntity(int borrowId, int bookId, 
+    String userName, LocalDate borrowDate, LocalDate returnDate) {
+        super(borrowId);
         this.bookId = bookId;
         this.userName = userName;
         this.borrowDate = borrowDate;
@@ -38,18 +36,18 @@ public class BorrowedBookEntity extends BaseEntity {
     }
 
     /**
-     * Lấy ID của sách đã mượn.
-     * 
-     * @return ID của sách đã mượn.
+     * Lấy ID của sách.
+     *
+     * @return ID của sách
      */
     public int getBookId() {
         return bookId;
     }
 
     /**
-     * Đặt ID của sách đã mượn.
-     * 
-     * @param bookId ID của sách cần thiết lập.
+     * Thiết lập ID của sách.
+     *
+     * @param bookId ID của sách
      */
     public void setBookId(int bookId) {
         this.bookId = bookId;
@@ -57,17 +55,17 @@ public class BorrowedBookEntity extends BaseEntity {
 
     /**
      * Lấy tên người dùng mượn sách.
-     * 
-     * @return Tên người dùng mượn sách.
+     *
+     * @return Tên người dùng mượn sách
      */
     public String getUserName() {
         return userName;
     }
 
     /**
-     * Đặt tên người dùng mượn sách.
-     * 
-     * @param userName Tên người dùng cần thiết lập.
+     * Thiết lập tên người dùng mượn sách.
+     *
+     * @param userName Tên người dùng mượn sách
      */
     public void setUserName(String userName) {
         this.userName = userName;
@@ -75,37 +73,37 @@ public class BorrowedBookEntity extends BaseEntity {
 
     /**
      * Lấy ngày mượn sách.
-     * 
-     * @return Ngày mượn sách dưới dạng LocalDateTime.
+     *
+     * @return Ngày mượn sách
      */
-    public LocalDateTime getBorrowDate() {
+    public LocalDate getBorrowDate() {
         return borrowDate;
     }
 
     /**
-     * Đặt ngày mượn sách.
-     * 
-     * @param borrowDate Ngày mượn sách cần thiết lập.
+     * Thiết lập ngày mượn sách.
+     *
+     * @param borrowDate Ngày mượn sách
      */
-    public void setBorrowDate(LocalDateTime borrowDate) {
+    public void setBorrowDate(LocalDate borrowDate) {
         this.borrowDate = borrowDate;
     }
 
     /**
      * Lấy ngày trả sách.
-     * 
-     * @return Ngày trả sách dưới dạng LocalDateTime.
+     *
+     * @return Ngày trả sách
      */
-    public LocalDateTime getReturnDate() {
+    public LocalDate getReturnDate() {
         return returnDate;
     }
 
     /**
-     * Đặt ngày trả sách.
-     * 
-     * @param returnDate Ngày trả sách cần thiết lập.
+     * Thiết lập ngày trả sách.
+     *
+     * @param returnDate Ngày trả sách
      */
-    public void setReturnDate(LocalDateTime returnDate) {
+    public void setReturnDate(LocalDate returnDate) {
         this.returnDate = returnDate;
     }
 }

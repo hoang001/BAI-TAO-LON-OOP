@@ -55,19 +55,14 @@ public class ReadBookDAOImpl implements ReadBookDao {
                 "WHERE rb.userName = ?";
 
         List<ReadBookEntity> readBooks = new ArrayList<>();
-        // Thiết lập kết nối và thực thi câu truy vấn
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-            preparedStatement.setString(1, userName);  // Đặt tên người dùng vào truy vấn
-
-            // Thực thi truy vấn và xử lý kết quả
+            preparedStatement.setString(1, userName);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    // Tạo đối tượng ReadBookEntity từ kết quả truy vấn
                     ReadBookEntity readBook = new ReadBookEntity(
                             resultSet.getInt("readId"),
-                            resultSet.getInt("bookId"),       // Lấy bookId từ bảng Books
-                            resultSet.getString("userName")   // Lấy userName từ bảng ReadBooks
+                            resultSet.getInt("bookId"),
+                            resultSet.getString("userName")
                     );
                     readBooks.add(readBook);
                 }

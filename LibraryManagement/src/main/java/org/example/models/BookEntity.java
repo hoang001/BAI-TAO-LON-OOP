@@ -1,31 +1,27 @@
 package org.example.models;
 
 /**
- * Lớp này đại diện cho thực thể sách, bao gồm các thông tin liên quan đến sách như ISBN, tên sách, 
- * tác giả, nhà xuất bản, năm xuất bản, thể loại, đường dẫn bìa sách và trạng thái sẵn có của sách.
- * Lớp này mở rộng từ BaseEntity để kế thừa thuộc tính ID của sách.
+ * Lớp đại diện cho một cuốn sách trong hệ thống.
  */
 public class BookEntity extends BaseEntity {
-
-    // Thuộc tính của lớp BookEntity
-    private String isbn;               // ISBN của sách
-    private String title;              // Tên sách
-    private String authorName;         // Tên tác giả
-    private String publisherName;      // Tên nhà xuất bản
-    private int publicationYear;       // Năm xuất bản
-    private String categoryName;       // Tên thể loại sách
-    private String bookCoverDirectory; // Đường dẫn đến bìa sách
-    private boolean available;         // Trạng thái có sẵn của sách
+    private String isbn;
+    private String title;
+    private String authorName;
+    private String publisherName;
+    private int publicationYear;
+    private String categoryName;
+    private String bookCoverDirectory;
+    private boolean available;
     private int quantity;
 
     /**
-     * Constructor mặc định cho BookEntity.
+     * Khởi tạo một đối tượng BookEntity mặc định.
      * Khởi tạo đối tượng BookEntity mà không cần thông tin đầu vào.
      */
     public BookEntity() {}
 
     /**
-     * Constructor cho BookEntity với các thông tin chi tiết về sách.
+     * Khởi tạo một đối tượng BookEntity với các thông tin chi tiết về sách.
      *
      * @param bookId             ID của sách.
      * @param isbn               ISBN của sách.
@@ -36,9 +32,11 @@ public class BookEntity extends BaseEntity {
      * @param categoryName       Thể loại của sách.
      * @param bookCoverDirectory Đường dẫn bìa sách.
      * @param available          Trạng thái có sẵn của sách.
-     * @param quantity
+     * @param quantity           Số lượng sách có sẵn.
      */
-    public BookEntity(int bookId, String isbn, String title, String authorName, String publisherName, int publicationYear, String categoryName, String bookCoverDirectory, boolean available, int quantity) {
+    public BookEntity(int bookId, String isbn, String title, String authorName, 
+    String publisherName, int publicationYear, String categoryName, 
+    String bookCoverDirectory, boolean available, int quantity) {
         super(bookId);  // Gọi constructor của lớp cha BaseEntity để thiết lập ID
         this.isbn = isbn;
         this.title = title;
@@ -195,9 +193,20 @@ public class BookEntity extends BaseEntity {
         this.available = available;
     }
 
+    /**
+     * Lấy số lượng sách có sẵn.
+     *
+     * @return Số lượng sách có sẵn.
+     */
     public int getQuantity() {
         return quantity;
     }
+
+    /**
+     * Đặt số lượng sách có sẵn.
+     *
+     * @param quantity Số lượng sách cần thiết lập.
+     */
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
