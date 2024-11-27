@@ -52,7 +52,7 @@ public class BorrowedBookController {
      * 
      * @return List<BorrowedBookEntity> Danh sách các sách chưa trả của người dùng.
      */
-    public List<BorrowedBookEntity> listNotReturnedBooks() {
+    public List<BorrowedBookEntity> getNotReturnedBooksByUser() {
         return borrowedBookService.getNotReturnedBooksByUser();  // Gọi phương thức của BorrowedBookService để lấy danh sách sách chưa trả.
     }
 
@@ -63,7 +63,7 @@ public class BorrowedBookController {
      * @param endDate Thời gian kết thúc của khoảng thời gian.
      * @return List<BorrowedBookEntity> Danh sách sách mượn của người dùng trong khoảng thời gian từ startDate đến endDate.
      */
-    public List<BorrowedBookEntity> listBorrowedBooksByDateRange(LocalDate startDate, LocalDate endDate) {
+    public List<BorrowedBookEntity> getBooksBorrowedInDateRange(LocalDate startDate, LocalDate endDate) {
         return borrowedBookService.getBorrowedBooksByUserAndDateRange(startDate, endDate);  // Gọi phương thức của BorrowedBookService để lấy danh sách sách mượn trong khoảng thời gian.
     }
 
