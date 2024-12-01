@@ -1,26 +1,30 @@
 package org.example.services.advanced;
 
-import org.example.daos.interfaces.LogDao;
-import org.example.daos.implementations.LogDaoImpl;
-import org.example.models.BookEntity;
-import org.example.models.BorrowedBookEntity;
-import org.example.models.LogEntity;
-import org.example.models.ReadBookEntity;
-import org.example.services.basics.BorrowedBookService;
-import org.example.services.basics.ReadBookService;
-import org.example.services.basics.UserService;
-import org.example.services.basics.BookService;
-
-import java.util.List;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Objects;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+
+import org.example.daos.implementations.LogDaoImpl;
+import org.example.daos.interfaces.LogDao;
+import org.example.models.BookEntity;
+import org.example.models.BorrowedBookEntity;
+import org.example.models.LogEntity;
+import org.example.models.ReadBookEntity;
+import org.example.services.basics.BookService;
+import org.example.services.basics.BorrowedBookService;
+import org.example.services.basics.ReadBookService;
+import org.example.services.basics.UserService;
 
 public class SearchService {
     /**
@@ -189,7 +193,7 @@ public class SearchService {
                 final List<BookEntity> sublist = allBooks.subList(i, Math.min(i + partitionSize, allBooks.size()));
                 tasks.add(() -> sublist.stream()
                         .map(book -> {
-                            return book.getCategoryName(); // Nếu tìm thấy thể loại, trả về tên
+                            return book.getCategory(); // Nếu tìm thấy thể loại, trả về tên
                         })
                         .filter(Objects::nonNull) // Lọc các kết quả không có thể loại
                         .filter(category -> category.toLowerCase().contains(normalizedKeyword)) // So sánh từ khóa với tên thể loại
@@ -212,9 +216,9 @@ public class SearchService {
             // Đưa các thể loại có trong sách đã đọc và sách đã mượn lên đầu
             List<String> prioritizedCategories = new ArrayList<>();
             for (BookEntity book : allBooks) {
-                if (book != null && result.contains(book.getCategoryName())) {
-                    prioritizedCategories.add(book.getCategoryName());
-                    result.remove(book.getCategoryName());
+                if (book != null && result.contains(book.getCategory())) {
+                    prioritizedCategories.add(book.getCategory());
+                    result.remove(book.getCategory());
                 }
             }
     
@@ -389,7 +393,7 @@ public class SearchService {
                 final List<BookEntity> sublist = allBooks.subList(i, Math.min(i + partitionSize, allBooks.size()));
                 tasks.add(() -> sublist.stream()
                         .map(book -> {
-                            return book.getCategoryName(); // Nếu tìm thấy nhà xuất bản, trả về tên
+                            return book.getCategory(); // Nếu tìm thấy nhà xuất bản, trả về tên
                         })
                         .filter(Objects::nonNull) // Lọc các kết quả không có nhà xuất bản
                         .filter(publisher -> publisher.toLowerCase().contains(normalizedKeyword)) // So sánh từ khóa với tên nhà xuất bản
@@ -412,9 +416,9 @@ public class SearchService {
             // Đưa các nhà xuất bản có trong sách đã đọc và sách đã mượn lên đầu
             List<String> prioritizedCategorys = new ArrayList<>();
             for (BookEntity book : allBooks) {
-                if (book != null && result.contains(book.getCategoryName())) {
-                    prioritizedCategorys.add(book.getCategoryName());
-                    result.remove(book.getCategoryName());
+                if (book != null && result.contains(book.getCategory())) {
+                    prioritizedCategorys.add(book.getCategory());
+                    result.remove(book.getCategory());
                 }
             }
     

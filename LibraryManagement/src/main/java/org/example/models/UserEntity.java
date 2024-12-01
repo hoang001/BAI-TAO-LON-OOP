@@ -27,10 +27,32 @@ public class UserEntity extends BaseEntity {
      */
     public UserEntity() {}
 
+        /**
+     * Khởi tạo một đối tượng UserEntity với các thông tin chi tiết.
+     *
+     * @param userName               Tên đăng nhập của người dùng
+     * @param passwordHash           Mã băm mật khẩu của người dùng
+     * @param email                  Email của người dùng
+     * @param firstName              Tên của người dùng
+     * @param lastName               Họ của người dùng
+     * @param phoneNumber            Số điện thoại của người dùng
+     * @param profileImageDirectory  URL ảnh đại diện của người dùng
+     */
+    public UserEntity(String userName, String passwordHash, String email,
+                      String firstName, String lastName, String phoneNumber,
+                      String profileImageDirectory) {
+        this.userName = userName;
+        this.passwordHash = passwordHash;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.profileImageDirectory = profileImageDirectory;
+    }
+
     /**
      * Khởi tạo một đối tượng UserEntity với các thông tin chi tiết.
      *
-     * @param userId                 ID của người dùng
      * @param userName               Tên đăng nhập của người dùng
      * @param passwordHash           Mã băm mật khẩu của người dùng
      * @param email                  Email của người dùng
@@ -40,10 +62,35 @@ public class UserEntity extends BaseEntity {
      * @param profileImageDirectory  URL ảnh đại diện của người dùng
      * @param role                   Vai trò của người dùng
      */
-    public UserEntity(int userId, String userName, String passwordHash, String email,
+    public UserEntity(String userName, String passwordHash, String email,
                       String firstName, String lastName, String phoneNumber,
                       String profileImageDirectory, Roles role) {
-        super(userId);
+        this.userName = userName;
+        this.passwordHash = passwordHash;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.profileImageDirectory = profileImageDirectory;
+        this.role = role;
+    }
+
+        /**
+     * Khởi tạo một đối tượng UserEntity với các thông tin chi tiết.
+     *
+     * @param userName               Tên đăng nhập của người dùng
+     * @param passwordHash           Mã băm mật khẩu của người dùng
+     * @param email                  Email của người dùng
+     * @param firstName              Tên của người dùng
+     * @param lastName               Họ của người dùng
+     * @param phoneNumber            Số điện thoại của người dùng
+     * @param profileImageDirectory  URL ảnh đại diện của người dùng
+     * @param role                   Vai trò của người dùng
+     */
+    public UserEntity(int UserID, String userName, String passwordHash, String email,
+                      String firstName, String lastName, String phoneNumber,
+                      String profileImageDirectory, Roles role) {
+        super(UserID);
         this.userName = userName;
         this.passwordHash = passwordHash;
         this.firstName = firstName;

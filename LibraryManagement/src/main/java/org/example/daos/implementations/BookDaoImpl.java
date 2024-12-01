@@ -1,12 +1,15 @@
 package org.example.daos.implementations;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.example.daos.interfaces.BookDao;
 import org.example.models.BookEntity;
 import org.example.utils.DatabaseConnection;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Cài đặt interface BookDAO để thực hiện các thao tác với bảng Books trong cơ sở dữ liệu.
@@ -29,16 +32,17 @@ public class BookDaoImpl implements BookDao {
    */
   @Override
   public boolean addBook(BookEntity book) throws SQLException {
-    String sql = "INSERT INTO Books (isbn, title, authorId, publisherId, publicationYear, categoryId, bookCoverDirectory, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    String sql = "INSERT INTO Books (isbn, title, authorName, publisherName, publishedDate, Category, bookCoverDirectory, available, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
       preparedStatement.setString(1, book.getIsbn());
       preparedStatement.setString(2, book.getTitle());
       preparedStatement.setString(3, book.getAuthorName());
       preparedStatement.setString(4, book.getPublisherName());
-      preparedStatement.setInt(5, book.getPublicationYear());
-      preparedStatement.setString(6, book.getCategoryName());
+      preparedStatement.setString(5, book.getPublishedDate());
+      preparedStatement.setString(6, book.getCategory());
       preparedStatement.setString(7, book.getBookCoverDirectory());
-      preparedStatement.setInt(8, book.getQuantity());
+      preparedStatement.setBoolean(8, book.isAvailable());
+      preparedStatement.setInt(9, book.getQuantity());
       int result = preparedStatement.executeUpdate();
       return result > 0;
     }
@@ -87,15 +91,17 @@ public class BookDaoImpl implements BookDao {
    */
   @Override
   public boolean updateBook(BookEntity book) throws SQLException {
-    String sql = "UPDATE Books SET title = ?, authorId = ?, publisherId = ?, publicationYear = ?, categoryId = ?, bookCoverDirectory = ? WHERE isbn = ?";
+    String sql = "UPDATE Books SET title = ?, authorName = ?, publisherName = ?, publishedDate = ?, category = ?, bookCoverDirectory = ?, available = ?, quantity = ? WHERE isbn = ?";
     try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
       preparedStatement.setString(7, book.getIsbn());
       preparedStatement.setString(1, book.getTitle());
       preparedStatement.setString(2, book.getAuthorName());
       preparedStatement.setString(3, book.getPublisherName());
-      preparedStatement.setInt(4, book.getPublicationYear());
-      preparedStatement.setString(5, book.getCategoryName());
+      preparedStatement.setString(4, book.getPublishedDate());
+      preparedStatement.setString(5, book.getCategory());
       preparedStatement.setString(6, book.getBookCoverDirectory());
+      preparedStatement.setBoolean(8, book.isAvailable());
+      preparedStatement.setInt(9, book.getQuantity());
       int result = preparedStatement.executeUpdate();
       return result > 0;
     }
@@ -129,6 +135,7 @@ public class BookDaoImpl implements BookDao {
    * @return true nếu cập nhật số lượng thành công, false nếu có lỗi.
    * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
    */
+  @Override
   public boolean updateBookQuantity(String isbn, int quantity) throws SQLException {
     String query = "UPDATE Books SET quantity = quantity + ? WHERE isbn = ?";
     try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -160,8 +167,8 @@ public class BookDaoImpl implements BookDao {
             resultSet.getString("Title"),
             resultSet.getString("AuthorName"),
             resultSet.getString("PublisherName"),
-            resultSet.getInt("PublicationYear"),
-            resultSet.getString("CategoryName"),
+            resultSet.getString("PublishedDate"),
+            resultSet.getString("Category"),
             resultSet.getString("BookCoverDirectory"),
             resultSet.getBoolean("Available"),
             resultSet.getInt("Quantity")
@@ -191,8 +198,8 @@ public class BookDaoImpl implements BookDao {
             resultSet.getString("Title"),
             resultSet.getString("AuthorName"),
             resultSet.getString("PublisherName"),
-            resultSet.getInt("PublicationYear"),
-            resultSet.getString("CategoryName"),
+            resultSet.getString("PublishedDate"),
+            resultSet.getString("Category"),
             resultSet.getString("BookCoverDirectory"),
             resultSet.getBoolean("Available"),
             resultSet.getInt("Quantity")
@@ -223,8 +230,8 @@ public class BookDaoImpl implements BookDao {
             resultSet.getString("Title"),
             resultSet.getString("AuthorName"),
             resultSet.getString("PublisherName"),
-            resultSet.getInt("PublicationYear"),
-            resultSet.getString("CategoryName"),
+            resultSet.getString("PublishedDate"),
+            resultSet.getString("Category"),
             resultSet.getString("BookCoverDirectory"),
             resultSet.getBoolean("Available"),
             resultSet.getInt("Quantity")
@@ -243,7 +250,7 @@ public class BookDaoImpl implements BookDao {
    */
   @Override
   public List<BookEntity> findBooksByAuthor(String authorName) throws SQLException {
-    String query = "SELECT * FROM Books WHERE authorId = (SELECT authorId FROM Authors WHERE name LIKE ?)";
+    String query = "SELECT * FROM Books WHERE authorName LIKE ?";
     List<BookEntity> books = new ArrayList<>();
     try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
       preparedStatement.setString(1, "%" + authorName + "%");
@@ -255,8 +262,8 @@ public class BookDaoImpl implements BookDao {
             resultSet.getString("Title"),
             resultSet.getString("AuthorName"),
             resultSet.getString("PublisherName"),
-            resultSet.getInt("PublicationYear"),
-            resultSet.getString("CategoryName"),
+            resultSet.getString("PublishedDate"),
+            resultSet.getString("Category"),
             resultSet.getString("BookCoverDirectory"),
             resultSet.getBoolean("Available"),
             resultSet.getInt("Quantity")
@@ -275,7 +282,7 @@ public class BookDaoImpl implements BookDao {
    */
   @Override
   public List<BookEntity> findBooksByGenre(String genre) throws SQLException {
-    String query = "SELECT * FROM Books WHERE categoryId = (SELECT categoryId FROM Categories WHERE name LIKE ?)";
+    String query = "SELECT * FROM Books WHERE category LIKE ?";
     List<BookEntity> books = new ArrayList<>();
     try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
       preparedStatement.setString(1, "%" + genre + "%");
@@ -287,8 +294,8 @@ public class BookDaoImpl implements BookDao {
             resultSet.getString("Title"),
             resultSet.getString("AuthorName"),
             resultSet.getString("PublisherName"),
-            resultSet.getInt("PublicationYear"),
-            resultSet.getString("CategoryName"),
+            resultSet.getString("PublishedDate"),
+            resultSet.getString("Category"),
             resultSet.getString("BookCoverDirectory"),
             resultSet.getBoolean("Available"),
             resultSet.getInt("Quantity")
@@ -307,7 +314,7 @@ public class BookDaoImpl implements BookDao {
    */
   @Override
   public List<BookEntity> findBooksByPublisher(String publisherName) throws SQLException {
-    String query = "SELECT * FROM Books WHERE publisherName = (SELECT publisherName FROM Publishers WHERE name LIKE ?)";
+    String query = "SELECT * FROM Books WHERE publisherName LIKE ?";
     List<BookEntity> books = new ArrayList<>();
     try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
       preparedStatement.setString(1, "%" + publisherName + "%");
@@ -319,8 +326,8 @@ public class BookDaoImpl implements BookDao {
             resultSet.getString("Title"),
             resultSet.getString("AuthorName"),
             resultSet.getString("PublisherName"),
-            resultSet.getInt("PublicationYear"),
-            resultSet.getString("CategoryName"),
+            resultSet.getString("PublishedDate"),
+            resultSet.getString("Category"),
             resultSet.getString("BookCoverDirectory"),
             resultSet.getBoolean("Available"),
             resultSet.getInt("Quantity")
@@ -349,8 +356,8 @@ public class BookDaoImpl implements BookDao {
             resultSet.getString("Title"),
             resultSet.getString("AuthorName"),
             resultSet.getString("PublisherName"),
-            resultSet.getInt("PublicationYear"),
-            resultSet.getString("CategoryName"),
+            resultSet.getString("PublishedDate"),
+            resultSet.getString("Category"),
             resultSet.getString("BookCoverDirectory"),
             resultSet.getBoolean("Available"),
             resultSet.getInt("Quantity")
@@ -367,6 +374,7 @@ public class BookDaoImpl implements BookDao {
    * @return true nếu sách tồn tại trong cơ sở dữ liệu, ngược lại false.
    * @throws SQLException Nếu có lỗi xảy ra trong quá trình truy vấn cơ sở dữ liệu.
    */
+  @Override
   public boolean isBookInDatabase(String isbn) throws SQLException {
     String query = "SELECT COUNT(*) FROM books WHERE isbn = ?";
     try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {

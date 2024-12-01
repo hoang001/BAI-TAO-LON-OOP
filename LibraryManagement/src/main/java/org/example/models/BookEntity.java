@@ -8,8 +8,8 @@ public class BookEntity extends BaseEntity {
     private String title;
     private String authorName;
     private String publisherName;
-    private int publicationYear;
-    private String categoryName;
+    private String publishedDate;
+    private String category;
     private String bookCoverDirectory;
     private boolean available;
     private int quantity;
@@ -29,21 +29,21 @@ public class BookEntity extends BaseEntity {
      * @param authorName         Tên tác giả của sách.
      * @param publisherName      Tên nhà xuất bản của sách.
      * @param publicationYear    Năm xuất bản sách.
-     * @param categoryName       Thể loại của sách.
+     * @param category       Thể loại của sách.
      * @param bookCoverDirectory Đường dẫn bìa sách.
      * @param available          Trạng thái có sẵn của sách.
      * @param quantity           Số lượng sách có sẵn.
      */
     public BookEntity(int bookId, String isbn, String title, String authorName, 
-    String publisherName, int publicationYear, String categoryName, 
+    String publisherName, String publishedDate, String category, 
     String bookCoverDirectory, boolean available, int quantity) {
         super(bookId);  // Gọi constructor của lớp cha BaseEntity để thiết lập ID
         this.isbn = isbn;
         this.title = title;
         this.authorName = authorName;
         this.publisherName = publisherName;
-        this.publicationYear = publicationYear;
-        this.categoryName = categoryName;
+        this.publishedDate = publishedDate;
+        this.category = category;
         this.bookCoverDirectory = bookCoverDirectory;
         this.available = available;
         this.quantity = quantity;
@@ -58,13 +58,61 @@ public class BookEntity extends BaseEntity {
         return isbn;
     }
 
+    public boolean validateISBN(String ISBN) {
+        // Remove hyphens and spaces
+        ISBN = ISBN.replaceAll("[\\s-]+", "");
+    
+        // Check if the ISBN is either 10 or 13 digits
+        if (ISBN.length() != 10 && ISBN.length() != 13) {
+            return false;
+        }
+    
+        if (ISBN.length() == 10) {
+            return isValidISBN10(ISBN);
+        } else {
+            return isValidISBN13(ISBN);
+        }
+    }
+    
+    private boolean isValidISBN10(String ISBN) {
+        int sum = 0;
+        for (int i = 0; i < 10; i++) {
+            if (!Character.isDigit(ISBN.charAt(i))) {
+                if (i == 9 && ISBN.charAt(i) == 'X') {
+                    sum += 10;
+                } else {
+                    return false;
+                }
+            } else {
+                sum += (10 - i) * Character.getNumericValue(ISBN.charAt(i));
+            }
+        }
+        return sum % 11 == 0;
+    }
+    
+    private boolean isValidISBN13(String ISBN) {
+        int sum = 0;
+        for (int i = 0; i < 13; i++) {
+            if (!Character.isDigit(ISBN.charAt(i))) {
+                return false;
+            }
+            int digit = Character.getNumericValue(ISBN.charAt(i));
+            sum += (i % 2 == 0) ? digit : digit * 3;
+        }
+        return sum % 10 == 0;
+    }
+
     /**
      * Đặt ISBN cho sách.
      * 
      * @param isbn ISBN của sách cần thiết lập.
      */
     public void setIsbn(String isbn) {
-        this.isbn = isbn;
+        if (validateISBN(isbn)) {
+            this.isbn = isbn;
+        } else {
+            System.out.println("Invalid ISBN format.");
+        }
     }
 
     /**
@@ -126,8 +174,8 @@ public class BookEntity extends BaseEntity {
      * 
      * @return Năm xuất bản sách.
      */
-    public int getPublicationYear() {
-        return publicationYear;
+    public String getPublishedDate() {
+        return publishedDate;
     }
 
     /**
@@ -135,8 +183,8 @@ public class BookEntity extends BaseEntity {
      * 
      * @param publicationYear Năm xuất bản cần thiết lập.
      */
-    public void setPublicationYear(int publicationYear) {
-        this.publicationYear = publicationYear;
+    public void setPublishedDate(String publishedDate) {
+        this.publishedDate = publishedDate;
     }
 
     /**
@@ -144,17 +192,17 @@ public class BookEntity extends BaseEntity {
      * 
      * @return Tên thể loại của sách.
      */
-    public String getCategoryName() {
-        return categoryName;
+    public String getCategory() {
+        return category;
     }
 
     /**
      * Đặt tên thể loại sách.
      * 
-     * @param categoryName Tên thể loại cần thiết lập.
+     * @param category Tên thể loại cần thiết lập.
      */
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     /**
@@ -210,4 +258,11 @@ public class BookEntity extends BaseEntity {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
+    public String getBookLink() {
+        // Implement logic to generate a link to the book's Google Books page
+        return "https://books.google.com/books?q=isbn:" + isbn;
+    }
+
+
 }
