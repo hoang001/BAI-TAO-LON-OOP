@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import org.example.daos.implementations.BookDaoImpl;
 import org.example.daos.implementations.LogDaoImpl;
 import org.example.daos.interfaces.BookDao;
@@ -17,6 +18,8 @@ import org.example.daos.interfaces.LogDao;
 import org.example.models.BookEntity;
 import org.example.models.LogEntity;
 import org.example.models.UserEntity.Roles;
+import org.example.services.advanced.APIInterface;
+import org.example.services.advanced.BooksAPIAdapter;
 
 /**
  * Lớp BookService chịu trách nhiệm quản lý các chức năng liên quan đến sách. Các chức năng bao gồm
@@ -44,6 +47,29 @@ public class BookService {
     this.userService = UserService.getInstance();
     this.logDao = new LogDaoImpl();
     this.executorService = Executors.newFixedThreadPool(4);
+  }
+
+    /**
+     * Add book from GGBooksAPI to database 
+     * 
+     * @param ISBN isbn
+     * @return true if successful, false otherwise
+     */
+    public boolean addBook(String ISBN) {
+      BookEntity dummy = new BookEntity();
+      if (!dummy.validateISBN(ISBN)) {
+          System.out.println("ISBN không hợp lệ.");
+          return false;
+      } else {
+          APIInterface db = new BooksAPIAdapter();
+          BookEntity toBeAdded = db.getBookEntity(ISBN);
+          if (toBeAdded!= null) {
+              return addBook(toBeAdded);
+          } else {
+              System.out.println("Không tìm thấy sách với cùng ISBN.");
+              return false;
+          }
+      }
   }
 
   /**

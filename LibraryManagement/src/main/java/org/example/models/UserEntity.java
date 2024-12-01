@@ -27,7 +27,28 @@ public class UserEntity extends BaseEntity {
      */
     public UserEntity() {}
 
-        /**
+    /**
+     * Khởi tạo một đối tượng UserEntity với các thông tin chi tiết.
+     *
+     * @param userName               Tên đăng nhập của người dùng
+     * @param passwordHash           Mã băm mật khẩu của người dùng
+     * @param email                  Email của người dùng
+     * @param firstName              Tên của người dùng
+     * @param lastName               Họ của người dùng
+     * @param phoneNumber            Số điện thoại của người dùng
+     * @param profileImageDirectory  URL ảnh đại diện của người dùng
+     */
+    public UserEntity(String userName, String passwordHash, String email,
+                      String firstName, String lastName, String phoneNumber) {
+        this.userName = userName;
+        this.passwordHash = passwordHash;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
+
+    /**
      * Khởi tạo một đối tượng UserEntity với các thông tin chi tiết.
      *
      * @param userName               Tên đăng nhập của người dùng

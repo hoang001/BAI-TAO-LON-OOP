@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+
 import org.example.daos.implementations.LogDaoImpl;
 import org.example.daos.interfaces.LogDao;
 import org.example.models.BookEntity;
@@ -204,7 +205,7 @@ public class SearchService {
             () ->
                 sublist.stream()
                     .map(
-                        BookEntity::getCategoryName)
+                        BookEntity::getCategory)
                     .filter(Objects::nonNull)
                     .filter(
                         category ->
@@ -231,9 +232,9 @@ public class SearchService {
       // Đưa các thể loại có trong sách đã đọc và sách đã mượn lên đầu
       List<String> prioritizedCategories = new ArrayList<>();
       for (BookEntity book : allBooks) {
-        if (book != null && result.contains(book.getCategoryName())) {
-          prioritizedCategories.add(book.getCategoryName());
-          result.remove(book.getCategoryName());
+        if (book != null && result.contains(book.getCategory())) {
+          prioritizedCategories.add(book.getCategory());
+          result.remove(book.getCategory());
         }
       }
 
@@ -459,9 +460,9 @@ public class SearchService {
       // Đưa các nhà xuất bản có trong sách đã đọc và sách đã mượn lên đầu
       List<String> prioritizedCategorys = new ArrayList<>();
       for (BookEntity book : allBooks) {
-        if (book != null && result.contains(book.getCategoryName())) {
-          prioritizedCategorys.add(book.getCategoryName());
-          result.remove(book.getCategoryName());
+        if (book != null && result.contains(book.getCategory())) {
+          prioritizedCategorys.add(book.getCategory());
+          result.remove(book.getCategory());
         }
       }
 

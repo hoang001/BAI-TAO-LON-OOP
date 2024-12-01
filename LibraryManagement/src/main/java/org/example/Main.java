@@ -1,11 +1,11 @@
 package org.example;
 
-import org.example.controllers.UserController;
-import org.example.controllers.SearchController;
-import org.example.models.UserEntity;
-
 import java.util.List;
 import java.util.Scanner;
+
+import org.example.controllers.SearchController;
+import org.example.controllers.UserController;
+import org.example.models.UserEntity;
 
 public class Main {
 
