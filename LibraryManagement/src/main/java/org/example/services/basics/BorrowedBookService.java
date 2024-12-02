@@ -87,7 +87,7 @@ public class BorrowedBookService {
       Future<BookEntity> futureBook = executorService.submit(() -> bookDao.findBookById(bookId));
       BookEntity book = futureBook.get(5, TimeUnit.SECONDS);
 
-      if (book == null || !book.getAvailable()) {
+      if (book == null || !book.isAvailable()) {
         throw new IllegalStateException("Không có sách này để mượn.");
       }
 

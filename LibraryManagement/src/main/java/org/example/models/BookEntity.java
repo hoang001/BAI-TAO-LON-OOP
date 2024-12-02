@@ -1,5 +1,14 @@
 package org.example.models;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.awt.image.BufferedImage;
+
 /**
  * Lớp đại diện cho một cuốn sách trong hệ thống.
  */
@@ -258,11 +267,31 @@ public class BookEntity extends BaseEntity {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-
+    
+    /**
+     * Tạo đường dẫn đến trang Google Books của sách.
+     *
+     * @return Đường dẫn đến trang Google Books.
+     */
     public String getBookLink() {
         // Implement logic to generate a link to the book's Google Books page
         return "https://books.google.com/books?q=isbn:" + isbn;
     }
 
-
+    /**
+     * Tạo mã QR code cho đường dẫn đến trang Google Books của sách.
+     * 
+     * @return QR code.
+     */
+    public BufferedImage getQRCode() {
+        String bookLink = getBookLink(); 
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        try {
+            BitMatrix bitMatrix = qrCodeWriter.encode(bookLink, BarcodeFormat.QR_CODE, 200, 200);
+            return MatrixToImageWriter.toBufferedImage(bitMatrix); 
+        } catch (WriterException e) {
+            System.out.println("Error generating QR code: " + e.getMessage());
+            return null; 
+        }
+    }
 }
