@@ -1,13 +1,15 @@
 package org.example.models;
 
+import java.awt.image.BufferedImage;
+
+import org.example.services.advanced.APIInterface;
+import org.example.services.advanced.BooksAPIAdapter;
+
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.awt.image.BufferedImage;
 
 /**
  * Lớp đại diện cho một cuốn sách trong hệ thống.
@@ -275,7 +277,9 @@ public class BookEntity extends BaseEntity {
      */
     public String getBookLink() {
         // Implement logic to generate a link to the book's Google Books page
-        return "https://books.google.com/books?q=isbn:" + isbn;
+        APIInterface api = new BooksAPIAdapter();
+        String bookLink = api.getLink(isbn);
+        return bookLink;
     }
 
     /**

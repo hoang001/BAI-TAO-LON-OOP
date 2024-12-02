@@ -11,9 +11,11 @@ import com.google.api.services.books.model.Volumes;
 
 
 public class BooksAPIAdapter implements APIInterface {
+    private final Books booksAccessing = BooksAPIService.getBooksService();
+
     @Override
     public BookEntity getBookEntity(String ISBN) {
-        Books booksAccessing = BooksAPIService.getBooksService();
+        
 
         try {
             // 1. Make the API call to get book information
@@ -50,5 +52,18 @@ public class BooksAPIAdapter implements APIInterface {
         }
     }
 
+    @Override
+    public String getLink(String ISBN) {
+        try {
+            // 1. Make the API call to get book information
+            Volume volume = booksAccessing.volumes().list("isbn:" + ISBN).execute().getItems().get(0);
 
+            return volume.getVolumeInfo().getInfoLink();
+        } catch (IOException e) {
+            // Handle potential exceptions from the API call
+            System.err.println("Error getting book link: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
