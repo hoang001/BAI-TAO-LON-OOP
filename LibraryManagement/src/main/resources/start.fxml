@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.view.StartView">
+    <!-- Ảnh nền -->
+    <children>
+        <ImageView fitWidth="1000" fitHeight="800" preserveRatio="true" smooth="true">
+            <image>
+                <Image url="@picture/background.jpg" />
+            </image>
+        </ImageView>
+
+        <!-- Nội dung phía trên -->
+        <VBox alignment="CENTER" spacing="20">
+            <children>
+                <Label text="CHÀO MỪNG BẠN ĐẾN VỚI THƯ VIỆN CỦA CHÚNG TÔI" 
+                    style="-fx-font-size: 35; 
+                            -fx-text-fill: #004d1c; 
+                            -fx-font-family: 'Cambria'; 
+                            -fx-font-weight: bold;" />
+                <Button text="ĐĂNG NHẬP" onAction="#onLoginButtonClick" prefWidth="250" style="-fx-font-size: 20; -fx-font-weight: bold;" />
+                <Button text="ĐĂNG KÝ" onAction="#onSignUpButtonClick" prefWidth="250" style="-fx-font-size: 20; -fx-font-weight: bold;" />
+            </children>
+        </VBox>
+    </children>
+</StackPane>

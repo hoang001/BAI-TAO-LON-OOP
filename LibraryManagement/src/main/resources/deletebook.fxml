@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.view.DeleteBook"
+      spacing="10" alignment="CENTER">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Xóa Sách" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+    <HBox spacing="10">
+        <TextField fx:id="tfIsbn" promptText="Nhập ISBN sách cần xóa" prefWidth="300"/>
+        <Button fx:id="btnDelete" text="Xóa Sách" onAction="#onDeleteBookByIsbn"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <TextField fx:id="tfBookId" promptText="Nhập ID sách cần xóa" prefWidth="300"/>
+        <Button fx:id="btnDeleteById" text="Xóa Sách Theo ID" onAction="#onDeleteBookById"/>
+    </HBox>
+
+    <Label fx:id="lblStatus" style="-fx-text-fill: green;"/>
+</VBox>

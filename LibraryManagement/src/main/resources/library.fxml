@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.view.LibraryView">
+    <children>
+        <!-- Bảng hiển thị danh sách sách -->
+        <TableView fx:id="tableBooks" layoutX="20.0" layoutY="100.0" prefHeight="400.0" prefWidth="760.0">
+            <columns>
+                <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="100.0" />
+                <TableColumn fx:id="colTitle" text="Tiêu đề" prefWidth="200.0" />
+                <TableColumn fx:id="colAuthor" text="Tác giả" prefWidth="150.0" />
+                <TableColumn fx:id="colCategory" text="Thể loại" prefWidth="100.0" />
+                <TableColumn fx:id="colPublisher" text="Nhà xuất bản" prefWidth="150.0" />
+                <TableColumn fx:id="colQuantity" text="Số lượng" prefWidth="60.0" />
+            </columns>
+        </TableView>
+
+        <!-- TextField cho tìm kiếm -->
+        <TextField fx:id="tfSearch" layoutX="20.0" layoutY="20.0" prefWidth="300.0" promptText="Nhập từ khóa tìm kiếm" onKeyReleased="#onSearchTextChanged" />
+
+        <!-- ComboBox cho tiêu chí tìm kiếm -->
+        <ComboBox fx:id="cbSearchCriteria" layoutX="340.0" layoutY="20.0" prefWidth="150.0" promptText="Chọn tiêu chí" />
+
+        <!-- Nút tìm kiếm -->
+        <Button fx:id="btnSearch" layoutX="510.0" layoutY="20.0" text="Tìm kiếm" onAction="#onSearchButtonClick" />
+
+        <!-- Label hiển thị trạng thái -->
+        <Label fx:id="lblStatus" layoutX="20.0" layoutY="520.0" text="Trạng thái" />
+
+        <!-- ListView hiển thị gợi ý tìm kiếm -->
+        <ListView fx:id="suggestionsList" layoutX="20.0" layoutY="60.0" prefHeight="100.0" prefWidth="300.0" visible="false" />
+
+        <!-- Nút quay lại -->
+        <Button fx:id="btnBack" layoutX="340.0" layoutY="550.0" prefWidth="120.0" text="Quay lại" onAction="#onBackButtonClick" />
+    </children>
+</AnchorPane>

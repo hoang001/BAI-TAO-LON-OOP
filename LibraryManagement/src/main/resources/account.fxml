@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.GridPane?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.view.AccountView" spacing="15" alignment="TOP_CENTER" style="-fx-background-color: #f5f5f5; -fx-padding: 20;">
+    <!-- Tiêu đề -->
+    <Label text="Thông tin tài khoản" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+
+    <!-- Hiển thị ảnh đại diện mặc định -->
+    <ImageView fx:id="profileImageView" fitWidth="150" fitHeight="150" preserveRatio="true" style="-fx-border-radius: 50%; -fx-background-radius: 50%; -fx-border-color: gray; -fx-border-width: 3;" />
+
+
+    <!-- GridPane cho thông tin tài khoản -->
+    <GridPane hgap="10" vgap="10" style="-fx-padding: 10;" alignment="CENTER">
+        <Label text="Tên đăng nhập:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Label fx:id="lUsername" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Họ và tên:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <Label fx:id="lFullName" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Email:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <Label fx:id="lEmail" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Label text="Vai trò:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <Label fx:id="lRole" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+    </GridPane>
+
+    <!-- Các nút hành động -->
+    <HBox spacing="20" alignment="CENTER">
+        <Button text="Đăng xuất" fx:id="bLogout" onAction="#onLogOutButtonClick" style="-fx-background-color: red; -fx-text-fill: white; -fx-pref-width: 120px;"/>
+        <Button text="Cập nhật tài khoản" fx:id="bUpdateAccount" onAction="#onUpdateAccountButtonClick" style="-fx-background-color: blue; -fx-text-fill: white; -fx-pref-width: 150px;"/>
+        <Button text="Quay lại trang chủ" fx:id="bGoBack" onAction="#onGoBackButtonClick" style="-fx-background-color: green; -fx-text-fill: white; -fx-pref-width: 150px;"/>
+    </HBox>
+</VBox>

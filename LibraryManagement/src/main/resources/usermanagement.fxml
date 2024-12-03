@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.view.UserManagement" spacing="10" alignment="CENTER" prefWidth="800" prefHeight="600" style="-fx-padding: 20;">
+    <!-- Bảng danh sách người dùng -->
+    <TableView fx:id="tblUsers" prefWidth="750" prefHeight="500">
+        <columns>
+            <TableColumn fx:id="colUsername" text="Tên đăng nhập" prefWidth="120" />
+            <TableColumn fx:id="colFirstName" text="Họ" prefWidth="100" />
+            <TableColumn fx:id="colLastName" text="Tên" prefWidth="100" />
+            <TableColumn fx:id="colEmail" text="Email" prefWidth="200" />
+            <TableColumn fx:id="colPhoneNumber" text="Số điện thoại" prefWidth="120" />
+            <TableColumn fx:id="colRole" text="Vai trò" prefWidth="100" />
+        </columns>
+    </TableView>
+
+    <!-- Nút quay lại -->
+    <Button fx:id="btnGoBack" text="Quay lại" onAction="#onGoBackButtonClick" />
+</VBox>

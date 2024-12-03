@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.view.AddBook"
+      spacing="10" alignment="CENTER">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Tiêu đề -->
+    <Label text="Thêm Sách" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+    <!-- Phần kiểm tra ISBN -->
+    <HBox spacing="10">
+        <TextField fx:id="tfIsbn" promptText="Nhập ISBN" prefWidth="250"/>
+        <Button fx:id="btnCheckIsbn" text="Kiểm tra ISBN" onAction="#onCheckIsbnButtonClick"/>
+    </HBox>
+
+    <!-- Form thông tin sách -->
+    <GridPane hgap="10" vgap="10" alignment="CENTER">
+        <Label text="Tên sách:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="tfTitle" promptText="Nhập tên sách" disable="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Tác giả:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="tfAuthor" promptText="Nhập tên tác giả" disable="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Nhà xuất bản:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="tfPublisher" promptText="Nhập nhà xuất bản" disable="true" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Thể loại:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="tfCategory" promptText="Nhập thể loại" disable="true" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <Label text="Năm xuất bản:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="tfPublicationYear" promptText="Nhập năm xuất bản" disable="true" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <Label text="Số lượng ban đầu:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <TextField fx:id="tfQuantity" promptText="Nhập số lượng ban đầu" disable="true" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+        <Label text="Số lượng thêm:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <TextField fx:id="tfAdditionalQuantity" promptText="Nhập số lượng thêm" disable="true" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <!-- Nút thao tác -->
+    <HBox spacing="10">
+        <Button fx:id="btnAddBook" text="Thêm Sách" onAction="#onAddBookButtonClick"/>
+        <Button fx:id="btnBack" text="Quay lại" onAction="#onBackButtonClick"/>
+    </HBox>
+
+    <!-- Trạng thái -->
+    <Label fx:id="lblStatus" style="-fx-text-fill: green;"/>
+</VBox>

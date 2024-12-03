@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.view.BookView"
+      spacing="15" alignment="CENTER" prefWidth="600" prefHeight="500" style="-fx-padding: 20; -fx-background-color: #f8f8f8;">
+    
+    <!-- Tiêu đề -->
+    <Label text="Thông Tin Sách" style="-fx-font-size: 24; -fx-font-weight: bold;" />
+    
+    <!-- Thông tin sách -->
+    <GridPane hgap="10" vgap="10" alignment="CENTER">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" />
+            <ColumnConstraints halignment="LEFT" />
+        </columnConstraints>
+        
+        <Label text="ISBN:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Label fx:id="lblIsbn" text="N/A" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        
+        <Label text="Tiêu đề:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <Label fx:id="lblTitle" text="N/A" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        
+        <Label text="Tác giả:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <Label fx:id="lblAuthor" text="N/A" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        
+        <Label text="Thể loại:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <Label fx:id="lblCategory" text="N/A" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        
+        <Label text="Nhà xuất bản:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <Label fx:id="lblPublisher" text="N/A" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        
+        <Label text="Số lượng:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <Label fx:id="lblQuantity" text="0" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+    </GridPane>
+    
+    <!-- Danh sách đánh giá -->
+    <VBox spacing="10" alignment="CENTER" prefWidth="500">
+        <Label text="Đánh Giá:" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+        <ListView fx:id="reviewList" prefHeight="150" />
+    </VBox>
+    
+    <!-- Nút thêm đánh giá -->
+    <Button fx:id="btnAddReview" text="Thêm Đánh Giá" onAction="#handleAddReview" style="-fx-font-size: 14; -fx-padding: 10;" />
+    
+    <!-- Phần mượn sách -->
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="Ngày trả:" />
+        <DatePicker fx:id="datePickerReturnDate" prefWidth="150" />
+        <Button fx:id="btnBorrowBook" text="Mượn Sách" onAction="#onBorrowButtonClick" style="-fx-font-size: 14; -fx-padding: 10;" />
+    </HBox>
+    
+    <!-- Nút quay lại -->
+    <Button fx:id="btnBack" text="Quay Lại" onAction="#onBackButtonClick" style="-fx-font-size: 14; -fx-padding: 10;" />
+</VBox>
