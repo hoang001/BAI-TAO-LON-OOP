@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane alignment="CENTER" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.view.SignUpView">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="300.0" />
+   </columnConstraints>
+
+   <rowConstraints>
+      <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+   </rowConstraints>
+
+   <children>
+      <!-- Các trường nhập liệu -->
+      <Label text="           Tên đăng nhập" GridPane.rowIndex="0" >
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <TextField fx:id="tFUsername" prefHeight="36.0" prefWidth="357.0" promptText="Nhập tên đăng nhập" GridPane.rowIndex="0" GridPane.columnIndex="1">
+         <GridPane.margin>
+            <Insets left="10.0" right="10.0" />
+         </GridPane.margin>
+      </TextField>
+
+      <Label text="           Mật khẩu" GridPane.rowIndex="1">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <PasswordField fx:id="tFPassword" prefHeight="36.0" prefWidth="357.0" promptText="Nhập mật khẩu" GridPane.rowIndex="1" GridPane.columnIndex="1">
+         <GridPane.margin>
+            <Insets left="10.0" right="10.0" />
+         </GridPane.margin>
+      </PasswordField>
+
+      <Label text="           Xác nhận mật khẩu" GridPane.rowIndex="2">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <PasswordField fx:id="tFConfirmPassword" prefHeight="36.0" prefWidth="357.0" promptText="Xác nhận mật khẩu" GridPane.rowIndex="2" GridPane.columnIndex="1">
+         <GridPane.margin>
+            <Insets left="10.0" right="10.0" />
+         </GridPane.margin>
+      </PasswordField>
+
+      <Label text="           Họ" GridPane.rowIndex="3">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <TextField fx:id="tFFirstName" prefHeight="36.0" prefWidth="357.0" promptText="Nhập họ" GridPane.rowIndex="3" GridPane.columnIndex="1">
+         <GridPane.margin>
+            <Insets left="10.0" right="10.0" />
+         </GridPane.margin>
+      </TextField>
+
+      <Label text="           Tên" GridPane.rowIndex="4">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <TextField fx:id="tFLastName" prefHeight="36.0" prefWidth="357.0" promptText="Nhập tên" GridPane.rowIndex="4" GridPane.columnIndex="1">
+         <GridPane.margin>
+            <Insets left="10.0" right="10.0" />
+         </GridPane.margin>
+      </TextField>
+
+      <Label text="           Email" GridPane.rowIndex="5">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <TextField fx:id="tFEmail" prefHeight="36.0" prefWidth="357.0" promptText="Nhập email" GridPane.rowIndex="5" GridPane.columnIndex="1">
+         <GridPane.margin>
+            <Insets left="10.0" right="10.0" />
+         </GridPane.margin>
+      </TextField>
+
+      <Label text="           Số điện thoại" GridPane.rowIndex="6">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <TextField fx:id="tFPhoneNumber" prefHeight="36.0" prefWidth="357.0" promptText="Nhập số điện thoại" GridPane.rowIndex="6" GridPane.columnIndex="1">
+         <GridPane.margin>
+            <Insets left="10.0" right="10.0" />
+         </GridPane.margin>
+      </TextField>
+
+      <!-- Button Đăng ký -->
+      <Button fx:id="bSignUp" text="ĐĂNG KÝ" onAction="#onSignUpButtonClick" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2" prefWidth="150.0" styleClass="bSignUp" GridPane.halignment="CENTER">
+         <GridPane.margin>
+            <Insets top="20.0" bottom="20.0" />
+         </GridPane.margin>
+      </Button>
+
+      <!-- Button Hủy -->
+      <Button fx:id="bCancel" text="HỦY" onAction="#onCancelButtonClick" GridPane.rowIndex="8" GridPane.columnIndex="0" GridPane.columnSpan="2" prefWidth="150.0" styleClass="bCancel" GridPane.halignment="CENTER">
+         <GridPane.margin>
+            <Insets top="10.0" bottom="20.0" />
+         </GridPane.margin>
+      </Button>
+   </children>
+</GridPane>

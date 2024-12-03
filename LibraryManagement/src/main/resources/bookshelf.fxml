@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.view.Bookshelf" spacing="10" style="-fx-padding: 10;">
+    <Label text="Bookshelf" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+    
+    <HBox spacing="20">
+        <VBox spacing="10">
+            <Label text="Books Currently Borrowed"/>
+            <TableView fx:id="borrowedBooksTable" prefWidth="600">
+                <columns>
+                    <TableColumn fx:id="bookTitleColumn" text="Book Title" prefWidth="200" />
+                    <TableColumn fx:id="borrowDateColumn" text="Borrow Date" prefWidth="150" />
+                    <TableColumn fx:id="returnDateColumn" text="Return Date" prefWidth="150" />
+                </columns>
+            </TableView>
+        </VBox>
+
+        <VBox spacing="10">
+            <Label text="Books Already Read"/>
+            <TableView fx:id="readBooksTable" prefWidth="600">
+                <columns>
+                    <TableColumn fx:id="readBookTitleColumn" text="Book Title" prefWidth="200" />
+                    <TableColumn fx:id="readDateColumn" text="Read Date" prefWidth="150" />
+                </columns>
+            </TableView>
+        </VBox>
+    </HBox> 
+
+    <!-- Nút Quay lại -->
+    <Button text="Quay lại" onAction="#onBackButtonClick" />
+</VBox>

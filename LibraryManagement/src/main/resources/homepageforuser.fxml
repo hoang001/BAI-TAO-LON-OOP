@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
+<GridPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.view.HomepageForUser"
+          alignment="CENTER" hgap="50" vgap="50"
+          style="-fx-padding: 50; -fx-background-color: #f9f9f9;">
+    <!-- Chào mừng người dùng -->
+    <Label text="CHÀO MỪNG, NGƯỜI DÙNG!"
+           style="-fx-font-size: 27; 
+                  -fx-text-fill: #004d1c; 
+                  -fx-font-family: 'Cambria'; 
+                  -fx-font-weight: bold;"
+           GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2" />
+
+    <!-- Nút Thư viện -->
+    <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="1">
+        <Button fx:id="btnLibrary" onAction="#onLibraryButtonClick"
+                prefWidth="120" prefHeight="120">
+            <graphic>
+                <ImageView fitWidth="100" fitHeight="100" preserveRatio="true">
+                    <image>
+                        <Image url="@picture/1.jpg" />
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+        <Label text="Thư Viện" style="-fx-font-size: 14; -fx-text-fill: #333;" />
+    </VBox>
+
+    <!-- Nút Tủ sách -->
+    <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
+        <Button fx:id="btnMyBooks" onAction="#onMyBooksButtonClick"
+                prefWidth="120" prefHeight="120">
+            <graphic>
+                <ImageView fitWidth="100" fitHeight="100" preserveRatio="true">
+                    <image>
+                        <Image url="@picture/2.jpg" />
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+        <Label text="Tủ Sách" style="-fx-font-size: 14; -fx-text-fill: #333;" />
+    </VBox>
+
+    <!-- Nút Tài khoản -->
+    <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="2">
+        <Button fx:id="btnAccount" onAction="#onAccountButtonClick"
+                prefWidth="120" prefHeight="120">
+            <graphic>
+                <ImageView fitWidth="100" fitHeight="100" preserveRatio="true">
+                    <image>
+                        <Image url="@picture/3.jpg" />
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+        <Label text="Tài Khoản" style="-fx-font-size: 14; -fx-text-fill: #333;" />
+    </VBox>
+
+    <!-- Nút Đăng xuất -->
+    <VBox alignment="CENTER" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="2">
+        <Button fx:id="btnLogOut" onAction="#onLogOutButtonClick"
+                prefWidth="120" prefHeight="120">
+            <graphic>
+                <ImageView fitWidth="100" fitHeight="100" preserveRatio="true">
+                    <image>
+                        <Image url="@picture/4.jpg" />
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+        <Label text="Đăng Xuất" style="-fx-font-size: 14; -fx-text-fill: #333;" />
+    </VBox>
+</GridPane>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.view.ManageLibrary"
+      spacing="10" alignment="CENTER">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Quản lý Thư viện" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+    <TableView fx:id="tableBooks" prefWidth="600" prefHeight="400">
+        <columns>
+            <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="100"/>
+            <TableColumn fx:id="colTitle" text="Tên sách" prefWidth="200"/>
+            <TableColumn fx:id="colAuthor" text="Tác giả" prefWidth="150"/>
+            <TableColumn fx:id="colPublisher" text="Nhà xuất bản" prefWidth="150"/>
+            <TableColumn fx:id="colQuantity" text="Số lượng" prefWidth="100"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button fx:id="btnAddBook" text="Thêm sách" onAction="#onAddBookButtonClick"/>
+        <Button fx:id="btnDeleteBook" text="Xóa sách" onAction="#onDeleteBookButtonClick"/>
+        <Button fx:id="btnBack" text="Quay lại" onAction="#onBackButtonClick"/>
+    </HBox>
+
+    <Label fx:id="lblStatus" text="" style="-fx-text-fill: green;"/>
+</VBox>
