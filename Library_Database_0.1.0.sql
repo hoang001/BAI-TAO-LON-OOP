@@ -6,10 +6,10 @@ CREATE TABLE Books (
     BookID INT AUTO_INCREMENT NOT NULL,
     ISBN VARCHAR(13) NOT NULL,
     Title VARCHAR(255) NOT NULL,
-    AuthorName VARCHAR,
-    PublisherName VARCHAR,
+    AuthorName VARCHAR(255),
+    PublisherName VARCHAR(255),
     PublishedDate DATE,
-    Category VARCHAR,
+    Category VARCHAR(255),
     BookCoverDirectory VARCHAR(100),
     Available BOOLEAN NOT NULL,
     Quantity INT NOT NULL,
@@ -40,8 +40,8 @@ CREATE TABLE BorrowedBooks (
     BorrowDate DATE NOT NULL,
     ReturnDate DATE NOT NULL,
     PRIMARY KEY (BorrowID),
-    FOREIGN KEY (BookID) REFERENCES Books(BookID),
-    FOREIGN KEY (Username) REFERENCES Users(Username)
+    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON UPDATE CASCADE,
+    FOREIGN KEY (Username) REFERENCES Users(Username) ON UPDATE CASCADE
 );
 
 CREATE TABLE ReadBooks (
@@ -49,8 +49,8 @@ CREATE TABLE ReadBooks (
     Username VARCHAR(20) NOT NULL,
     BookID INT NOT NULL,
     PRIMARY KEY (ReadID),
-    FOREIGN KEY (BookID) REFERENCES Books(BookID),
-    FOREIGN KEY (Username) REFERENCES Users(Username)
+    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON UPDATE CASCADE,
+    FOREIGN KEY (Username) REFERENCES Users(Username) ON UPDATE CASCADE
 );
 
 CREATE TABLE Logs (
@@ -59,7 +59,7 @@ CREATE TABLE Logs (
     Username VARCHAR(20) NOT NULL,
     ActionDetails TEXT,
     PRIMARY KEY (LogID),
-    FOREIGN KEY (Username) REFERENCES Users(Username)
+    FOREIGN KEY (Username) REFERENCES Users(Username) ON UPDATE CASCADE
 );
 
 CREATE TABLE Reviews (
@@ -69,5 +69,5 @@ CREATE TABLE Reviews (
     Rating INT NOT NULL,
     Comment TEXT,
     PRIMARY KEY (ReviewID),
-    FOREIGN KEY (BookID) REFERENCES Books(BookID)
+    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON UPDATE CASCADE
 );
