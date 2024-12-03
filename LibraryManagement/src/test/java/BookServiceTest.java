@@ -6,6 +6,11 @@ public class BookServiceTest {
 
     private final BookService bookService = new BookService();
 
+
+    /** 
+     * Test both the addBook method due to addBook(BookEntity)
+     * ís included in addBook(String).
+     */
     @Test
     void testAddBook() {
         // Test adding a book using the addBook(String ISBN) method
@@ -15,6 +20,5 @@ public class BookServiceTest {
         // Clean up: Delete the added book
         bookService.deleteBookByIsbn(isbn); 
     }
-
-
+    
 }
