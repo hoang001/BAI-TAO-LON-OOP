@@ -1,18 +1,19 @@
 package org.example.view;
 
+import java.io.IOException;
+
+import org.example.MainLibrary;
+import org.example.models.UserEntity;
+
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import org.example.mainLibrary;
-import org.example.models.UserEntity;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class AccountView {
 
@@ -92,7 +93,7 @@ public class AccountView {
     public void onLogOutButtonClick() {
         try {
             Stage currentStage = (Stage) bLogout.getScene().getWindow();
-            mainLibrary.init(currentStage);
+            MainLibrary.init(currentStage);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -14,7 +14,7 @@ import java.io.IOException;
 public class AddBook {
 
     @FXML
-    private TextField tfIsbn, tfTitle, tfAuthor, tfPublisher, tfCategory, tfPublicationYear, tfQuantity, tfAdditionalQuantity;
+    private TextField tfIsbn, tfTitle, tfAuthor, tfPublisher, tfCategory, tfPublishedDate, tfQuantity, tfAdditionalQuantity;
 
     @FXML
     private Button btnCheckIsbn, btnAddBook, btnBack;
@@ -47,8 +47,8 @@ public class AddBook {
                 tfTitle.setText(existingBook.getTitle());
                 tfAuthor.setText(existingBook.getAuthorName());
                 tfPublisher.setText(existingBook.getPublisherName());
-                tfCategory.setText(existingBook.getCategoryName());
-                tfPublicationYear.setText(String.valueOf(existingBook.getPublicationYear()));
+                tfCategory.setText(existingBook.getCategory());
+                tfPublishedDate.setText(String.valueOf(existingBook.getPublishedDate()));
                 tfQuantity.setText(String.valueOf(existingBook.getQuantity()));
     
                 tfAdditionalQuantity.setDisable(false); // Cho phép nhập số lượng thêm
@@ -108,7 +108,7 @@ public class AddBook {
                     tfAuthor.getText().trim(),
                     tfPublisher.getText().trim(),
                     tfCategory.getText().trim(),
-                    Integer.parseInt(tfPublicationYear.getText().trim()),
+                    tfPublishedDate.getText().trim(),
                     Integer.parseInt(tfQuantity.getText().trim())
                 );
     
@@ -139,7 +139,7 @@ public class AddBook {
         tfAuthor.setDisable(false);
         tfPublisher.setDisable(false);
         tfCategory.setDisable(false);
-        tfPublicationYear.setDisable(false);
+        tfPublishedDate.setDisable(false);
         tfQuantity.setDisable(false);
         tfAdditionalQuantity.setDisable(true);
     }
@@ -164,14 +164,14 @@ public class AddBook {
         tfAuthor.clear();
         tfPublisher.clear();
         tfCategory.clear();
-        tfPublicationYear.clear();
+        tfPublishedDate.clear();
         tfQuantity.clear();
         tfAdditionalQuantity.clear();
         tfTitle.setDisable(true);
         tfAuthor.setDisable(true);
         tfPublisher.setDisable(true);
         tfCategory.setDisable(true);
-        tfPublicationYear.setDisable(true);
+        tfPublishedDate.setDisable(true);
         tfQuantity.setDisable(true);
         tfAdditionalQuantity.setDisable(true);
         lblStatus.setText("");

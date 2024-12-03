@@ -1,21 +1,21 @@
 package org.example.view;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import org.example.controllers.BorrowedBookController;
+import org.example.controllers.ReviewController;
+import org.example.models.BookEntity;
+import org.example.models.ReviewEntity;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import org.example.models.BookEntity;
-import org.example.models.BorrowedBookEntity;
-import org.example.models.ReviewEntity;
-import org.example.controllers.ReviewController;
-import org.example.controllers.BorrowedBookController;
-
-import java.time.LocalDate;
-import java.util.List;
 
 public class BookView {
 
@@ -62,7 +62,7 @@ public class BookView {
         lblIsbn.setText(book.getIsbn());
         lblTitle.setText(book.getTitle());
         lblAuthor.setText(book.getAuthorName());
-        lblCategory.setText(book.getCategoryName());
+        lblCategory.setText(book.getCategory());
         lblPublisher.setText(book.getPublisherName());
         lblQuantity.setText(String.valueOf(book.getQuantity()));
 

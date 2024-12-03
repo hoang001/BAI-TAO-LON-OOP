@@ -1,6 +1,7 @@
+import org.example.models.BookEntity;
 import org.example.services.basics.BookService;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BookServiceTest {
 
