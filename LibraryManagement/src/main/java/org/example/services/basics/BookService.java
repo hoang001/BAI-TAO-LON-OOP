@@ -50,7 +50,7 @@ public class BookService {
   }
 
     /**
-     * Add book from GGBooksAPI to database 
+     * Add book from GGBooksAPI to database from ISBN input.
      * 
      * @param ISBN isbn
      * @return true if successful, false otherwise

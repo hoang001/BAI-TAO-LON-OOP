@@ -10,10 +10,15 @@ import com.google.api.services.books.model.Volume.VolumeInfo;
 import com.google.api.services.books.model.Volumes;
 
 
-
+// Adapter cho BooksAPIService
 public class BooksAPIAdapter implements APIInterface {
     private final Books booksAccessing = BooksAPIService.getBooksService();
 
+    /**
+     * Convert Books của GGBooks API thành BookEntity.
+     * 
+     * @return BookEntity
+     */
     @Override
     public BookEntity getBookEntity(String ISBN) {
         try {
@@ -83,6 +88,11 @@ public class BooksAPIAdapter implements APIInterface {
         }
     }
 
+    /**
+     * Tạo liên kết với API để lấy link sách dựa vào ISBN.
+     * 
+     * @return Link sách
+     */
     @Override
     public String getLink(String ISBN) {
         try {

@@ -10,6 +10,12 @@ public abstract class BooksAPIService {
     private static final String APPLICATION_NAME = "Library_Management";
     private static final String API_KEY = "AIzaSyDGjxnNso58E9KMG4dW-zjiHp2KmUbtSaw";
 
+
+    /**
+     * Lấy Books của GGAPI (như một dạng interface để tương tác với database của GGBooks API)
+     * 
+     * @return Books
+     */
     public static Books getBooksService() {
         return new Books.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), null)
                 .setApplicationName(APPLICATION_NAME)
